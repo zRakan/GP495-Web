@@ -1,4 +1,14 @@
 <script setup>
+const notification = useToast();
+    async function logout() {
+        const resp = await $fetch('/api/logout', { method: "POST" });
+
+        if(!resp.status) return notification.add({ title: "There's an issue" });
+
+        console.log("Test");
+        await navigateTo('/login');
+    }
+
     // Toggle menu
     const isOpen = ref(false);
 
@@ -69,7 +79,7 @@
                     <p>{{ user.name }}</p>
 
                     <UTooltip text="Logout">
-                        <BootstrapIcon id="iconHover" name="box-arrow-right" />
+                        <BootstrapIcon @click="logout" id="iconHover" name="box-arrow-right" />
                     </UTooltip>
                 </div>
             </div>            
