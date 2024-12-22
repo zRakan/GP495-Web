@@ -40,19 +40,19 @@
 </script>
 
 <template>
-    <div class="h-screen flex bg-slate-800 pr-2 pt-3">
+    <div class="h-screen flex bg-slate-800 pr-2 pt-2">
         
         <div id="left-panel" class="flex flex-col bg-slate-800" :class="{ open: isOpen }">
-            <BootstrapIcon @click="isOpen=!isOpen" id="iconHover" class="pl-2 text-[32px]" :class="isOpen && 'translate-x-[160px]'" :name="isOpen ? 'box-arrow-in-left' : 'arrow-right-square'" />
+            <UIcon @click="isOpen=!isOpen" id="iconHover" class="mx-auto w-[36px] h-[36px]" :class="isOpen && '!w-[28px] !h-[28px] translate-x-[80px] mb-5'" :name="isOpen ? 'i-ri-layout-column-fill' : 'i-ri-layout-right-fill'" />
             
-            <BootstrapIcon v-if="!isOpen" id="iconHover" class="pl-2 text-[32px]" name="chat-dots-fill" />
+            <UIcon v-if="!isOpen" id="iconHover" class="mx-auto w-[36px] h-[36px]" name="i-ri-message-3-fill" />
             <div v-else class="flex flex-col px-2 gap-4">
                 <div class="flex flex-row justify-between p-2 rounded-lg bg-gray-500 bg-opacity-50 hover:bg-opacity-75 cursor-pointer" v-for="chat in chatList">
                     <p>{{ chat }}</p>
 
                     <UPopover overlay>
                         <UTooltip text="Delete chat">
-                            <BootstrapIcon class='transition-colors cursor-pointer hover:text-[red]' name="trash" />
+                            <UIcon class='transition-colors cursor-pointer hover:text-[red]' name="i-bi-trash" />
                         </UTooltip>
 
                         <template #panel="{ close }">
@@ -70,7 +70,7 @@
             </div>
 
             <!-- Profile -->
-            <BootstrapIcon v-if="!isOpen" id="iconHover" class="mt-auto pl-2 text-[32px]" name="person-circle" />
+            <UIcon v-if="!isOpen" id="iconHover" class="mt-auto mb-1 mx-auto w-[36px] h-[36px]" name="i-ri-account-circle-fill" />
             <div v-else class="mt-auto px-2">
                 <UDivider :ui="{ border: { base: 'dark:border-gray-200' } }" label="Account" />
                 
@@ -78,7 +78,7 @@
                     <p>{{ user.name }}</p>
 
                     <UTooltip text="Logout">
-                        <BootstrapIcon @click="logout" id="iconHover" name="box-arrow-right" />
+                        <UIcon @click="logout" id="iconHover" name="i-ri-logout-box-line" />
                     </UTooltip>
                 </div>
             </div>            
@@ -88,7 +88,7 @@
             <!-- Chat container -->
             <div id="chat-container" class="w-full flex flex-col gap-2">
 
-                <div id="chat-header" class="h-[50px] flex px-2 justify-between items-center bg-slate-900 rounded-md">
+                <div id="chat-header" class="h-[50px] flex flex-shrink-0 px-2 justify-between items-center bg-slate-900 rounded-md">
                     <h2>AI Chatbot</h2>
                     <UInput icon="i-heroicons-magnifying-glass-20-solid" placeholder="Search..." :autocomplete="false" />
                 </div>
@@ -97,7 +97,7 @@
                     <template v-for="(message, index) in history">                    
                         <div class="message" :id="message.sender" :class="(index > 0 && history[index-1].sender == message.sender) ? 'mb-5' : 'mb-1'">
                             <div id="message-header" class="flex gap-2 mb-2 items-center" v-if="index == 0 || history[index-1].sender != message.sender">
-                                <BootstrapIcon class="text-[28px]" :name="message.sender == 'you' ? 'person-circle' : 'robot'" />
+                                <UIcon class="text-[28px]" :name="message.sender == 'you' ? 'i-ri-user-3-fill' : 'i-ri-robot-2-fill'" />
                                 <p class="text-[18px]">{{ message.sender == 'you' ? "You" : "AI" }}</p>
                             </div>
                             
@@ -106,11 +106,10 @@
                         </div>
                     </template>
                 </div>
-
             </div>
 
             <!-- Diagrams container -->
-            <div id="diagrams-container" class="rounded-md w-[250px] bg-slate-900 pt-3">
+            <div id="diagrams-container" class="rounded-md w-[250px] bg-slate-900 pt-3 overflow-y-auto">
                 <div class="bg-slate-500 w-[150px] p-2 mx-auto rounded-2xl bg-opacity-50 hover:bg-opacity-75 transition-transform hover:-translate-y-0.5">
                     <h2 class="text-center">Diagrams</h2>
                 </div>
