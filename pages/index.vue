@@ -1,5 +1,5 @@
 <script setup>
-const notification = useToast();
+    const notification = useToast();
     async function logout() {
         const resp = await $fetch('/api/logout', { method: "POST" });
 
@@ -30,18 +30,17 @@ const notification = useToast();
     const { user } = useUserSession();
 
     const history = ref([
-        { type: 'you', message: 'How many patients?' },
-        { type: 'you', message: 'How many patients?' },
-        { type: 'ai', message: 'SELECT COUNT(*) FROM PATIENTS;' },
-        { type: 'ai', message: 'SELECT COUNT(*) FROM PATIENTSX;' },
-        { type: 'you', message: 'With their names, please' },
-        { type: 'ai', message: 'SELECT first, last FROM PATIENTS;' }
-
+        { sender: 'you', type: 'text', message: 'How many patients?' },
+        { sender: 'ai', type: 'text', message: 'SELECT COUNT(*) FROM PATIENTSX;' },
+        { sender: 'ai', type: 'diagram', message: 'WOOW' },
+        { sender: 'you', type: 'text', message: 'With their names, please' },
+        { sender: 'ai', type: 'text', message: 'SELECT first, last FROM PATIENTS;' }, 
+        { sender: 'ai', type: 'diagram', message: 'WOOW' },
     ]);
 </script>
 
 <template>
-    <div class="h-screen flex bg-slate-800 pr-2 pt-3 pb-10">
+    <div class="h-screen flex bg-slate-800 pr-2 pt-3">
         
         <div id="left-panel" class="flex flex-col bg-slate-800" :class="{ open: isOpen }">
             <BootstrapIcon @click="isOpen=!isOpen" id="iconHover" class="pl-2 text-[32px]" :class="isOpen && 'translate-x-[160px]'" :name="isOpen ? 'box-arrow-in-left' : 'arrow-right-square'" />
@@ -85,7 +84,7 @@ const notification = useToast();
             </div>            
         </div>
 
-        <div id="container" class="w-full rounded-lg h-full flex gap-2 bg-slate-950 p-2">
+        <div id="container" class="w-full rounded-t-lg h-full flex gap-2 bg-slate-950 p-2">
             <!-- Chat container -->
             <div id="chat-container" class="w-full flex flex-col gap-2">
 
@@ -96,13 +95,14 @@ const notification = useToast();
 
                 <div id="chat-content" class="overflow-y-auto h-full p-2 bg-slate-900 rounded-md flex flex-col px-5">
                     <template v-for="(message, index) in history">                    
-                        <div class="message" :id="message.type" :class="(index > 0 && history[index-1].type == message.type) ? 'mb-5' : 'mb-1'">
-                            <div id="message-header" class="flex gap-2 mb-2 items-center" v-if="index == 0 || history[index-1].type != message.type">
-                                <BootstrapIcon class="text-[28px]" :name="message.type == 'you' ? 'person-circle' : 'robot'" />
-                                <p class="text-[18px]">{{ message.type == 'you' ? "You" : "AI" }}</p>
+                        <div class="message" :id="message.sender" :class="(index > 0 && history[index-1].sender == message.sender) ? 'mb-5' : 'mb-1'">
+                            <div id="message-header" class="flex gap-2 mb-2 items-center" v-if="index == 0 || history[index-1].sender != message.sender">
+                                <BootstrapIcon class="text-[28px]" :name="message.sender == 'you' ? 'person-circle' : 'robot'" />
+                                <p class="text-[18px]">{{ message.sender == 'you' ? "You" : "AI" }}</p>
                             </div>
                             
-                            <p class="w-fit p-4 rounded-2xl bg-primary-700" :class="message.type == 'ai' && 'bg-primary-950'">{{ message.message }}</p>
+                            <p v-if="message.type == 'text'" class="w-fit p-4 rounded-2xl bg-primary-700" :class="message.sender == 'ai' && 'bg-primary-950'">{{ message.message }}</p>
+                            <p :ref="'diagram-' + index" v-else-if="message.type =='diagram'" class="w-fit p-4 rounded-2xl bg-primary-400">Assume this is a diagram</p>
                         </div>
                     </template>
                 </div>
@@ -114,10 +114,14 @@ const notification = useToast();
                 <div class="bg-slate-500 w-[150px] p-2 mx-auto rounded-2xl bg-opacity-50 hover:bg-opacity-75 transition-transform hover:-translate-y-0.5">
                     <h2 class="text-center">Diagrams</h2>
                 </div>
+
+                <div class="flex flex-col gap-2 p-4">
+                    <template v-for="(diagram, ind) in $refs">
+                        <UButton @click="diagram[0].scrollIntoView({ behavior: 'smooth' })">{{ ind }}</UButton>
+                    </template>
+                </div>
             </div>
         </div>
-
-        <p class="absolute bottom-2 mx-auto">Hello World</p>
     </div>
 </template>
 
