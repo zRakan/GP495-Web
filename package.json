@@ -16,6 +16,7 @@
     "nuxt-auth-utils": "^0.5.7",
     "nuxt-plotly": "1.0.12",
     "vue": "latest",
-    "vue-router": "latest"
+    "vue-router": "latest",
+    "vue-showdown": "^4.2.0"
   }
 }
