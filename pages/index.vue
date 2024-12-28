@@ -1,4 +1,6 @@
 <script setup>
+    import { VueShowdown } from 'vue-showdown';
+
     const notification = useToast();
     async function logout() {
         const resp = await $fetch('/api/logout', { method: "POST" });
@@ -9,16 +11,37 @@
         await navigateTo('/login');
     }
 
+    const state = ref({
+        message: undefined,
+        pending: false
+    })
+    async function createChannel(message) {
+
+        state.value.pending = true;
+        const resp = await $fetch('/api/send', {
+            method: "POST",
+
+            body: { message: state.value.message }
+        });
+        state.value.pending = false;
+
+        chatList.value.push({ title: 'New chat', id: resp.id })
+    }
+
+    async function loadChat(id) {
+        const resp = await $fetch('/api/chat', {
+            query: { id }
+        });
+
+        history.value = resp.history   
+    }
+
     // Toggle menu
-    const isOpen = ref(false);
+    const isOpen = ref(true);
 
-    const chatList = ref([ // Dummy
-        "Patient Records",
-        "Hospital employee",
-        "Medical treatment",
-        "Light show"
-    ]);
-
+    const chatList = ref(null);
+    const { data: chats } = await useFetch('/api/chats');
+    chatList.value = chats.value;
 
     async function sleep(id, popperClose) {
         await new Promise(r => setTimeout(r, 1000));
@@ -29,14 +52,20 @@
 
     const { user } = useUserSession();
 
-    const history = ref([
-        { sender: 'you', type: 'text', message: 'How many patients?' },
-        { sender: 'ai', type: 'text', message: 'SELECT COUNT(*) FROM PATIENTSX;' },
-        { sender: 'ai', type: 'diagram', message: 'WOOW' },
-        { sender: 'you', type: 'text', message: 'With their names, please' },
-        { sender: 'ai', type: 'text', message: 'SELECT first, last FROM PATIENTS;' }, 
-        { sender: 'ai', type: 'diagram', message: 'WOOW' },
-    ]);
+    // const history = ref([
+    //     { sender: 'you', type: 'text', message: 'How many patients?' },
+    //     { sender: 'ai', type: 'text', message: 'SELECT COUNT(*) FROM PATIENTSX;' },
+    //     { sender: 'ai', type: 'diagram', message: 'WOOW' },
+    //     { sender: 'you', type: 'text', message: 'With their names, please' },
+    //     { sender: 'ai', type: 'text', message: 'SELECT first, last FROM PATIENTS;' }, 
+    //     { sender: 'ai', type: 'diagram', message: 'WOOW' }
+    // ]);
+
+    const history = ref(null);
+    
+    const config = { scrollZoom: true, displayModeBar: false };
+
+    const diagramList = useTemplateRef('diagrams');
 </script>
 
 <template>
@@ -46,9 +75,9 @@
             <UIcon @click="isOpen=!isOpen" id="iconHover" class="mx-auto w-[36px] h-[36px]" :class="isOpen && '!w-[28px] !h-[28px] translate-x-[80px] mb-5'" :name="isOpen ? 'i-ri-layout-column-fill' : 'i-ri-layout-right-fill'" />
             
             <UIcon v-if="!isOpen" id="iconHover" class="mx-auto w-[36px] h-[36px]" name="i-ri-message-3-fill" />
-            <div v-else class="flex flex-col px-2 gap-4">
-                <div class="flex flex-row justify-between p-2 rounded-lg bg-gray-500 bg-opacity-50 hover:bg-opacity-75 cursor-pointer" v-for="chat in chatList">
-                    <p>{{ chat }}</p>
+            <div v-else class="flex flex-col px-2 gap-4 overflow-y-auto h-96">
+                <div @click="loadChat(chat.id)" class="flex flex-row justify-between p-2 rounded-lg bg-gray-500 bg-opacity-50 hover:bg-opacity-75 cursor-pointer" v-for="chat in chatList">
+                    <p>{{ chat.title }}</p>
 
                     <UPopover overlay>
                         <UTooltip text="Delete chat">
@@ -60,7 +89,7 @@
                                 <p class="text-sm pb-2">Are you sure?</p>
 
                                 <div class="flex flex-row gap-2">
-                                    <UButton size="2xs" label="Yes" @click="deleteChat(id, close)" />
+                                    <UButton size="2xs" label="Yes" @click="deleteChat(chat.id, close)" />
                                     <UButton size="2xs" label="No" @click="close" />
                                 </div>
                             </div>
@@ -93,16 +122,20 @@
                     <UInput icon="i-heroicons-magnifying-glass-20-solid" placeholder="Search..." :autocomplete="false" />
                 </div>
 
-                <div id="chat-content" class="overflow-y-auto h-full p-2 bg-slate-900 rounded-md flex flex-col px-5">
+                <div id="chat-content" class="overflow-auto h-full p-2 bg-slate-900 rounded-md flex flex-col px-5">
                     <template v-for="(message, index) in history">                    
-                        <div class="message" :id="message.sender" :class="(index > 0 && history[index-1].sender == message.sender) ? 'mb-5' : 'mb-1'">
-                            <div id="message-header" class="flex gap-2 mb-2 items-center" v-if="index == 0 || history[index-1].sender != message.sender">
-                                <UIcon class="text-[28px]" :name="message.sender == 'you' ? 'i-ri-user-3-fill' : 'i-ri-robot-2-fill'" />
-                                <p class="text-[18px]">{{ message.sender == 'you' ? "You" : "AI" }}</p>
+                        <div class="message" :id="message.role" :class="(index > 0 && history[index-1].role == message.role) ? 'mb-5' : 'mb-1'">
+                            <div id="message-header" class="flex gap-2 mb-2 items-center" v-if="index == 0 || history[index-1].role != message.role">
+                                <UIcon class="text-[28px]" :name="message.role == 'user' ? 'i-ri-user-3-fill' : 'i-ri-robot-2-fill'" />
+                                <p class="text-[18px]">{{ message.role == 'user' ? "You" : "AI" }}</p>
                             </div>
                             
-                            <p v-if="message.type == 'text'" class="w-fit p-4 rounded-2xl bg-primary-700" :class="message.sender == 'ai' && 'bg-primary-950'">{{ message.message }}</p>
-                            <p :ref="'diagram-' + index" v-else-if="message.type =='diagram'" class="w-fit p-4 rounded-2xl bg-primary-400">Assume this is a diagram</p>
+                            <ClientOnly>
+
+                                <p v-if="!message.type" :style="message.role == 'assistant' ? 'background: linear-gradient(to left, red 0px, red 3px, white 3px, white 100%);' : 'background: linear-gradient(to right, red 0px, red 3px, white 3px, white 100%);'"  class="w-fit p-4 text-[#292929] rounded-md outline-2 outline-[#DDDDDD]">{{ message.content }}</p>
+                                <VueShowdown v-else-if="message.type == 'Markdown'" :markdown="message.content" :options="{tables: true}" />
+                                <nuxt-plotly v-else-if="message.type == 'Plotly'" style="width: 400px;" :data="JSON.parse(message.content).data" :layout="JSON.parse(message.content).layout" :config="config" />
+                            </ClientOnly>
                         </div>
                     </template>
                 </div>
@@ -114,12 +147,24 @@
                     <h2 class="text-center">Diagrams</h2>
                 </div>
 
-                <div class="flex flex-col gap-2 p-4">
-                    <template v-for="(diagram, ind) in $refs">
-                        <UButton @click="diagram[0].scrollIntoView({ behavior: 'smooth' })">{{ ind }}</UButton>
-                    </template>
-                </div>
+                <ClientOnly>
+                    <div class="flex flex-col gap-2 p-4">
+                        <template v-for="(diagram, ind) in diagramList">
+                            {{ console.log(diagram, ind) }}
+                            <UButton @click="diagram.scrollIntoView({ behavior: 'smooth' })">{{ ind }}</UButton>
+                        </template>
+                    </div>
+                </ClientOnly>
             </div>
+
+            <!-- No chat selected-->
+            <UForm :state="state" @submit.prevent="createChannel">
+                <UFormGroup label="Message" name="message">
+                    <UInput v-model="state.message" />
+                </UFormGroup>
+
+                <UButton :loading="state.pending" block type="submit">Send</UButton>
+            </UForm>
         </div>
     </div>
 </template>
@@ -149,7 +194,7 @@
         color: gray;
     }
 
-    .message#ai {
+    .message#assistant {
         align-self: end;
     }
 
