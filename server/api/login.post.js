@@ -21,6 +21,10 @@ export default defineEventHandler(async function(event) {
         await setUserSession(event, {
             user: {
                 name: user.username
+},
+
+            secure: {
+                authorId: user.id
             }
         });
 
