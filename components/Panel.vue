@@ -45,10 +45,10 @@
 
         <div class="overflow-y-auto">
             <template v-for="chat in chatList">
-                <div class="flex items-center">
-                    <div class="cursor-pointer px-1 py-2 rounded-md flex w-full gap-1 items-center transition-colors hover:bg-primary-500 hover:bg-opacity-">
-                        <UIcon name="mdi-chat-processing-outline" />
-                        <p class="truncate">{{ chat.title }}</p>
+                <div class="flex items-center max-w-[188px]">
+                    <div class="cursor-pointer px-1 py-2 rounded-md flex w-full gap-1 items-center transition-colors hover:bg-primary-100 truncate">
+                        <UIcon class="min-w-[16px] min-h-[16px]" name="mdi-chat-processing-outline" />
+                        <p class="w-[85%] truncate">{{ chat.title }}</p>
                     </div>
 
                     <div class="flex ml-auto bg-green-500 p-1 rounded-2xl" v-if="chat.id == selectedChat">
