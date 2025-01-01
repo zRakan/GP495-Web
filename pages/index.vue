@@ -1,5 +1,5 @@
 <template>
-    <div class="h-screen flex bg-[#f3f6fb] dark:bg-[#181818] transition-colors">
+    <div class="h-screen flex">
         <Panel />
         <Chat />
     </div>
