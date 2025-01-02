@@ -28,10 +28,13 @@
 </script>
 
 <template>
-    <div class="h-auto w-[250px] rounded-2xl flex flex-col gap-4 mx-5 m-2 pt-3 px-4 bg-[#ffffff] dark:bg-[#1e1e1e]" :class="{ 'shadow-2xl': !isDark }">
+    <div class="h-auto w-[250px] rounded-2xl flex flex-col gap-4 mx-5 m-2 pt-3 px-4 bg-[#ffffff] dark:bg-[#1e1e1e] shadow-2xl dark:shadow-none">
         <div class="flex items-center">
             <p class="text-[28px] pb-2">Mostaelim</p>
+
+            <ClientOnly>
             <UButton class="ml-auto" :color="isDark ? 'gray' : 'white'" @click="isDark = !isDark" variant="ghost" :icon="isDark ? 'material-symbols:light-mode' : 'material-symbols:dark-mode'" />
+            </ClientOnly>
         </div>
         <UButton size="xl" :ui="{ rounded: 'rounded-full' }" icon="ri-add-line" label="New Chat" block />
 
