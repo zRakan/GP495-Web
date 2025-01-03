@@ -1,4 +1,4 @@
-import { Chat } from "../models/Chats.model.js.js"; 
+import { Chat } from "../models/Chats.model.js"; 
 
 function badInputs(event) {
     setResponseStatus(event, 400);
