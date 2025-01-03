@@ -6,6 +6,17 @@
     const { data: chats } = await useFetch('/api/chats');
     chatList.value = [...chats.value];
 
+    // Create chat
+    async function createChat() {
+        const data = await $fetch('/api/chat', {
+            method: "PUT"
+        });
+
+        if(data) {
+            chatList.value.push({ id: data.id, title: data.title });
+        }
+    }
+
     // Select chat
     const selectedChat = useState('chat:selected', () => { return null });
     const history = useState('chat:history', () => { return [] }); // Chat history
@@ -49,7 +60,7 @@
             <UButton class="ml-auto" :color="isDark ? 'gray' : 'white'" @click="isDark = !isDark" variant="ghost" :icon="isDark ? 'material-symbols:light-mode' : 'material-symbols:dark-mode'" />
             </ClientOnly>
         </div>
-        <UButton size="xl" :ui="{ rounded: 'rounded-full' }" icon="ri-add-line" label="New Chat" block />
+        <UButton @click="createChat()" size="xl" :ui="{ rounded: 'rounded-full' }" icon="ri-add-line" label="New Chat" block />
 
         <PanelSection>
             <p class="text-[12px]">Your conversations</p>
