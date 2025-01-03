@@ -41,7 +41,7 @@
 </script>
 
 <template>
-    <div class="h-auto w-[250px] rounded-2xl flex flex-col gap-4 mx-5 m-2 pt-3 px-4 bg-[#ffffff] dark:bg-[#1e1e1e] shadow-2xl dark:shadow-none">
+    <div class="w-[250px] rounded-2xl flex flex-col gap-4 mx-5 m-2 pt-3 px-4 bg-[#ffffff] dark:bg-[#1e1e1e] shadow-2xl dark:shadow-none">
         <div class="flex items-center">
             <p class="text-[28px] pb-2">Mostaelim</p>
 
@@ -77,7 +77,7 @@
 
         <div class="mb-3 mt-auto">
             <div class="flex items-center border-gray-500 border-[1px] rounded-2xl p-2 mb-2">
-                <div class="rounded-2xl w-[25px] h-[25px] flex justify-center items-center mr-4 bg-primary-500">
+                <div class="rounded-2xl w-[24px] h-[24px] flex justify-center items-center mr-4 bg-primary-500">
                     <UIcon name="solar-settings-outline" />
                 </div>
 
@@ -85,7 +85,7 @@
             </div>
             
             <div class="flex items-center border-gray-500 border-[1px] rounded-2xl p-2">
-                <div class="rounded-2xl w-[25px] h-[25px] flex justify-center items-center mr-4 bg-primary-500">
+                <div class="rounded-2xl w-[24px] h-[24px] flex justify-center items-center mr-4 bg-primary-500">
                     <UIcon name="material-symbols:account-circle" />
                 </div>
 
