@@ -1,16 +1,66 @@
 <script setup>
+    import { VueShowdown } from 'vue-showdown';
+
+    const messages = useState('chat:history', () => { return [] });
+    const selectedChat = useState('chat:selected', () => { return null });
+
     const message = ref('');
-    function send() {        
+    async function send() {
+        const data = await $fetch('/api/send', {
+            method: "POST",
+
+            body: { id: selectedChat.value, message: message.value }
+        });
+
         // Reset input
         message.value = '';
+
+        // Append new messages
+        messages.value.push(...data.messages);
     }
 </script>
 
 <template>
-    <div id="chat-container" class="w-full flex flex-col items-center">
+    <div id="chat-container" class="w-[calc(80%-6rem)] flex flex-col items-center">
+        <div id="chat-content" class="w-full h-full py-8 pl-24 overflow-y-auto">
+
+            <ClientOnly>
+                <template v-for="(message, index) in messages">
+                    <UDivider class="p-5" v-if="message.role == 'user' && index > 0 && messages[index-1].role == 'assistant'" />
+                    
+                    <!-- User's message -->
+                    <div class="flex items-center" v-if="message.role == 'user'">
+                        <div class="rounded-2xl min-w-[24px] min-h-[24px] flex justify-center items-center mr-2 bg-primary-500">
+                            <UIcon name="material-symbols:account-circle" />
+                        </div>
+
+                        <p>{{ message.content }}</p>
+                    </div>
+
+                    <!-- AI Resposne -->
+                    <div class="pt-2 pl-[32px] overflow-x-auto" v-if="message.role == 'assistant'">
+                        <p class="pb-2 text-primary-500" v-if="index > 0 && messages[index-1].role != message.role">Mostaelim <UIcon name="line-md:search" /></p>
+
+                        <p v-if="!message.type">{{ message.content }}</p>
+
+                        <VueShowdown class="w-fit transition-colors" v-else-if="message.type == 'Markdown'" flavor="original" :markdown="message.content" :options="{ tables: true, literalMidWordUnderscores: true }" />
+
+                        <nuxt-plotly v-else-if="message.type == 'Plotly'" style="width: 400px;" :data="JSON.parse(message.content).data" :layout="JSON.parse(message.content).layout" :config="{ scrollZoom: true, displayModeBar: false }" />
+                    </div>
+                </template>
+            </ClientOnly>
+        </div>
+
         <div id="input-container" class="h-[50px] w-[500px] flex items-center mb-5 mt-auto rounded-3xl bg-white dark:bg-[#1e1e1e] p-1 shadow-2xl dark:shadow-none">
             <input @keyup.enter="send" v-model="message" placeholder="Enter your message..." class="h-full w-full rounded-3xl p-2 border-none outline-none text-sm dark:bg-[#1e1e1e]" />
             <UIcon @click="send" class="w-6 h-6 cursor-pointer hover:text-primary-500 transition-colors" name="material-symbols:send-outline-rounded" />
         </div>
     </div>
 </template>
+
+<style scoped>
+    #chat-content {
+        -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+        mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+    }
+</style>

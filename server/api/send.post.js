@@ -41,22 +41,19 @@ export default defineEventHandler(async function(event) {
             }
         */
 
-        chat.history.push(...resp.conversation)
+        chat.history = resp.conversation;
 
         // Save chat state
         await chat.save();
         
-        const [sqlQuery, sqlMarkdown, sqlPlotly] = resp.conversation.slice(-3);
+        // Get new resposnes
+        let messages = (resp.conversation.findLastIndex((message) => message.role == 'user'));
+            messages = resp.conversation.slice(messages);
 
-        let returnedData = {
-            sql: sqlQuery.content,
-            markdown: sqlMarkdown.content,
-            plotly: sqlPlotly.content
-        }
-
+        const returnedData = { messages }
         if(!body.id) returnedData.id = chat.id
 
-        return returnedData;
+        return { messages };
     } catch(err) {
         return {}
     }

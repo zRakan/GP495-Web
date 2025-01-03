@@ -1,11 +1,24 @@
 <script setup>
     const { user } = useUserSession()
 
+    // Get chats
     const chatList = ref(null);
     const { data: chats } = await useFetch('/api/chats');
     chatList.value = [...chats.value];
 
-    const selectedChat = ref(null);
+    // Select chat
+    const selectedChat = useState('chat:selected', () => { return null });
+    const history = useState('chat:history', () => { return [] }); // Chat history
+    async function selectChat(id) {
+        const data = await $fetch('/api/chat', {
+            query: { id }
+        });
+
+        if(data) {
+            selectedChat.value = id;
+            history.value = data.history;
+        }
+    }
 
     // Color mode
     const theme = useColorMode();
@@ -49,7 +62,7 @@
         <div class="overflow-y-auto">
             <template v-for="chat in chatList">
                 <div class="flex items-center max-w-[188px]">
-                    <div class="cursor-pointer px-1 py-2 rounded-md flex w-full gap-1 items-center transition-colors hover:bg-primary-100 truncate">
+                    <div @click="selectedChat != chat.id && selectChat(chat.id)" class="cursor-pointer px-1 py-2 rounded-md flex w-full gap-1 items-center transition-colors hover:bg-primary-100 truncate">
                         <UIcon class="min-w-[16px] min-h-[16px]" name="mdi-chat-processing-outline" />
                         <p class="w-[85%] truncate">{{ chat.title }}</p>
                     </div>
