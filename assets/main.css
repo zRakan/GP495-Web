@@ -18,3 +18,52 @@ body {
 .dark body {
   background-color: #181818;
 }
+
+.dark table {
+  background: #1e1e1e;
+
+  thead tr {
+    background: rgb(var(--color-primary-400));
+  }
+}
+
+table {
+  border-spacing: 1;
+  border-collapse: collapse;
+
+  background: white;
+
+  border-radius: 6px;
+  overflow: hidden;
+  width: 100%;
+  margin: 0 auto;
+
+  td, th {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  thead th {
+    text-align: center !important;
+  }
+
+  tbody td {
+    text-align: left !important;
+  }
+
+  thead tr {
+    background: rgb(var(--color-primary-500));
+
+    height: 60px;
+    font-size: 16px;
+  }
+
+  tbody tr {
+    height: 48px;
+    border-bottom: 1px solid #e3f1d5;
+
+    &:last-child {
+      border: 0;
+    }
+  }
+}
