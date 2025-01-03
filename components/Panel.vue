@@ -44,9 +44,19 @@
     });
 
     // Confirmations
-    function deleteChat(answer, close) {
-        console.log("Test", answer);
+    async function deleteChat(id, close) {
+        if(id) {
+            const data = await $fetch('/api/chat', {
+                method: "DELETE",
 
+                query: { id } // All chats
+            });
+
+            if(data)
+                chatList.value = id == -1 ? [] : chatList.value.filter(el => el.id != id);
+        }
+
+        if(close)
         close();
     }
 </script>
@@ -72,14 +82,14 @@
 
         <div class="overflow-y-auto">
             <template v-for="chat in chatList">
-                <div class="flex items-center max-w-[188px]">
-                    <div @click="selectedChat != chat.id && selectChat(chat.id)" class="cursor-pointer px-1 py-2 rounded-md flex w-full gap-1 items-center transition-colors hover:bg-primary-100 truncate">
+                <div class="flex items-center relative">
+                    <div @click="selectedChat != chat.id && selectChat(chat.id)" class="cursor-pointer px-1 py-2 rounded-md flex w-full gap-1 items-center transition-colors hover:bg-primary-100 dark:hover:bg-primary-400 truncate">
                         <UIcon class="min-w-[16px] min-h-[16px]" name="mdi-chat-processing-outline" />
                         <p class="w-[85%] truncate">{{ chat.title }}</p>
                     </div>
 
-                    <div class="flex ml-auto bg-green-500 p-1 rounded-2xl" v-if="chat.id == selectedChat">
-                        <UIcon name="solar-trash-bin-trash-outline" />
+                    <div class="flex ml-auto bg-green-500 p-1 rounded-2xl absolute right-1" v-if="chat.id == selectedChat">
+                        <UIcon @click="deleteChat(chat.id)" class="cursor-pointer hover:bg-red-500" name="solar-trash-bin-trash-outline" />
                         <UIcon name="material-symbols:edit-square-outline" />
                     </div>
                 </div>

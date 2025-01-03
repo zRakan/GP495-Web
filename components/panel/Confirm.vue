@@ -11,7 +11,7 @@
                 <p>Are you sure?</p>
 
                 <div class="flex flex-row gap-2">
-                    <UButton @click="emit('clicked', true, close)" label="Yes" />
+                    <UButton @click="emit('clicked', -1, close)" label="Yes" />
                     <UButton @click="emit('clicked', false, close)" label="No" />
                 </div>
             </div>
