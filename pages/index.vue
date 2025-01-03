@@ -1,6 +1,6 @@
 <template>
     <div class="h-screen flex">
-        <Panel />
+        <Panel class="z-0" />
         <Chat />
     </div>
 </template>
