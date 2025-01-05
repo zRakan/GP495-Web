@@ -3,21 +3,29 @@
 
     const messages = useState('chat:history', () => { return [] });
     const selectedChat = useState('chat:selected', () => { return null });
+    const chatList = useState('chat:list', () => { return null })
 
     const message = ref('');
-    async function send() {
+    async function send({ channelId, sentMessage }) {        
         const data = await $fetch('/api/send', {
             method: "POST",
 
-            body: { id: selectedChat.value, message: message.value }
+            body: { id: channelId || selectedChat.value, message: sentMessage || message.value }
         });
+
+        // Created a new chat
+        if(data.chat) {
+            chatList.value.push({ id: data.chat.id, title: data.chat.title });
+        }
 
         // Reset input
         message.value = '';
 
         // Append new messages
+        if(!channelId) // Already in chat window
         messages.value.push(...data.messages);
     }
+
 </script>
 
 <template>

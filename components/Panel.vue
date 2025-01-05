@@ -2,37 +2,13 @@
     const { user } = useUserSession()
 
     // Get chats
-    const chatList = ref(null);
+    const chatList = useState('chat:list', () => { return null });
     const { data: chats } = await useFetch('/api/chats');
     chatList.value = [...chats.value];
-
-    // Create chat
-    async function createChat() {
-        const data = await $fetch('/api/chat', {
-            method: "PUT"
-        });
-
-        if(data) {
-            chatList.value.push({ id: data.id, title: data.title });
-        }
-    }
 
     // Select chat
     const selectedChat = useState('chat:selected', () => { return null });
     const history = useState('chat:history', () => { return [] }); // Chat history
-    async function selectChat(id) {
-        const data = await $fetch('/api/chat', {
-            query: { id }
-        });
-
-        if(data) {
-            selectedChat.value = id;
-            history.value = data.history;
-
-            // Reset editing mode
-            editing.value = false;
-        }
-    }
 
     // Color mode
     const theme = useColorMode();
@@ -54,8 +30,11 @@
                 query: { id } // All chats
             });
 
-            if(data)
+            if(data) {
                 chatList.value = id == -1 ? [] : chatList.value.filter(el => el.id != id);
+                selectedChat.value = null;
+                history.value = [];
+            }
         }
 
         if(close)
@@ -63,7 +42,7 @@
     }
 
     // Edit chat title
-    const editing = ref(false);
+    const editing = useState('chat:editing', () => { return false });
     const currentTitle = ref(null);
     async function toggleEdit(id, title) {
         if(editing.value) { // Finished edit
@@ -106,7 +85,7 @@
                 <UButton class="ml-auto" :color="isDark ? 'gray' : 'white'" @click="isDark = !isDark" variant="ghost" :icon="isDark ? 'material-symbols:light-mode' : 'material-symbols:dark-mode'" />
             </ClientOnly>
         </div>
-        <UButton @click="createChat()" size="xl" :ui="{ rounded: 'rounded-full' }" icon="ri-add-line" label="New Chat" block />
+        <UButton @click="selectChat(null)" size="xl" :ui="{ rounded: 'rounded-full' }" icon="ri-add-line" label="New Chat" block />
 
         <PanelSection>
             <p class="text-[12px]">Your conversations</p>
