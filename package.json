@@ -18,5 +18,10 @@
     "vue": "latest",
     "vue-router": "latest",
     "vue-showdown": "^4.2.0"
+  },
+  "devDependencies": {
+    "@iconify-json/material-symbols": "^1.2.12",
+    "@iconify-json/ri": "^1.2.5",
+    "@iconify-json/solar": "^1.2.2"
   }
 }
