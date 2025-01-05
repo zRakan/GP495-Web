@@ -5,6 +5,15 @@ function badInputs(event) {
     return { status: "Failed" }
 }
 
+function validJSON(data) {
+    try {
+        JSON.parse(data);
+        return true;
+    } catch(err) {
+        return false;
+    }
+}
+
 export default defineEventHandler(async function(event) {
     const { secure } = await requireUserSession(event);
     
@@ -41,19 +50,32 @@ export default defineEventHandler(async function(event) {
             }
         */
 
+        // Get new response & validate it
+        const messagesIndex = (resp.conversation.findLastIndex((message) => message.role == 'user'));
+        const messages = resp.conversation.slice(messagesIndex);
+        
+        // Validate plotly json
+        for(let message = messagesIndex; message < resp.conversation.length; message++) {
+            if(resp.conversation[message].type == "Plotly" && !validJSON(resp.conversation[message].content)) {
+                
+                // fallback JSON
+                resp.conversation[message].content = JSON.stringify({
+                    data: {},
+                    layout: {}
+                });
+            }
+        }
+        
         chat.history = resp.conversation;
+
 
         // Save chat state
         await chat.save();
         
-        // Get new resposnes
-        let messages = (resp.conversation.findLastIndex((message) => message.role == 'user'));
-            messages = resp.conversation.slice(messages);
-
         const returnedData = { messages }
-        if(!body.id) returnedData.chat = chat
+        if(!body.id) returnedData.chat = { id: chat.id, title: chat.title };
 
-        return { returnedData };
+        return { ...returnedData };
     } catch(err) {
         return {}
     }
