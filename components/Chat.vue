@@ -4,7 +4,7 @@
     const messages = useState('chat:history', () => { return [] });
     const selectedChat = useState('chat:selected', () => { return null });
     const chatList = useState('chat:list', () => { return null })
-
+    
     const message = ref('');
     async function send({ channelId, sentMessage }) {        
         const data = await $fetch('/api/send', {
@@ -23,13 +23,42 @@
 
         // Append new messages
         if(!channelId) // Already in chat window
-        messages.value.push(...data.messages);
+            messages.value.push(...data.messages);
     }
 
+    // Get suggestions
+    const { data: suggestions } = await useFetch('/api/suggestions');
+    async function suggestion(suggest) {        
+        let data = await createChat({ display: false });
+        if(data) {
+            // Send message
+            await send({ channelId: data.id, sentMessage: suggest });
+
+            // Display chat in panel
+            chatList.value.push({ id: data.id, title: data.title });
+
+            // Select chat
+            await selectChat(data.id);
+        }
+    }
 </script>
 
 <template>
-    <div id="chat-container" class="w-[calc(80%-6rem)] flex flex-col items-center">
+    <div v-if="!selectedChat" class="w-[100%] flex flex-col justify-center items-center">
+        <p class="text-3xl">Welcome to Mostaelim</p>
+
+        <div id="input-container" class="h-[50px] w-[500px] my-2 flex items-center rounded-3xl bg-white dark:bg-[#1e1e1e] p-1 shadow-2xl dark:shadow-none">
+            <input @keyup.enter="send" v-model="message" placeholder="Enter your message..." class="h-full w-full rounded-3xl p-2 border-none outline-none text-sm dark:bg-[#1e1e1e]" />
+            <UIcon @click="send" class="w-6 h-6 cursor-pointer hover:text-primary-500 transition-colors" name="material-symbols:send-outline-rounded" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 w-[470px]">
+            <UButton block size="xs" v-for="suggest in suggestions" @click=suggestion(suggest) :label="suggest" />
+        </div>
+    </div>
+
+    <!-- If chat is chosen -->
+    <div v-else id="chat-container" class="w-[calc(80%-6rem)] flex flex-col items-center">
         <div id="chat-content" class="w-full h-full py-8 pl-24 overflow-y-auto">
 
             <ClientOnly>
