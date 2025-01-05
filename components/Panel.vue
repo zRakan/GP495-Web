@@ -1,5 +1,5 @@
 <script setup>
-    const { user } = useUserSession()
+    const { user, clear } = useUserSession();
 
     // Get chats
     const chatList = useState('chat:list', () => { return null });
@@ -74,6 +74,12 @@
 
         editing.value = editing.value == id ? false : id;
     }
+
+    // Logout
+    async function logout() {
+        await clear();
+        await navigateTo('/login');
+    }
 </script>
 
 <template>
@@ -122,13 +128,24 @@
                 <p>Settings</p>
             </div>
             
+            <UPopover :popper="{ placement: 'top-end' }" :ui="{ strategy: 'override', trigger: 'w-full rounded-2xl' }">
             <div class="flex items-center border-gray-500 border-[1px] rounded-2xl p-2">
                 <div class="rounded-2xl w-[24px] h-[24px] flex justify-center items-center mr-4 bg-primary-500">
                     <UIcon name="material-symbols:account-circle" />
                 </div>
 
-                <p>{{ user.name}}</p>
+                    <p>{{ user.name }}</p>
+                </div>
+
+                <template #panel>
+                    <div class="p-2">
+                        <div class="flex flex-row items-center justify-center">
+                            <p class="text-sm">Logout?</p>
+                            <UButton @click="logout()" variant="link" color="red" label="Yes" />
+                        </div>
             </div>
+                </template>
+            </UPopover>
         </div>
     </div>
 </template>
