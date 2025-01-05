@@ -51,9 +51,9 @@ export default defineEventHandler(async function(event) {
             messages = resp.conversation.slice(messages);
 
         const returnedData = { messages }
-        if(!body.id) returnedData.id = chat.id
+        if(!body.id) returnedData.chat = chat
 
-        return { messages };
+        return { returnedData };
     } catch(err) {
         return {}
     }
