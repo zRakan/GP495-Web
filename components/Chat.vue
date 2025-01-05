@@ -6,7 +6,7 @@
     const chatList = useState('chat:list', () => { return null })
     
     const message = ref('');
-    async function send({ channelId, sentMessage }) {        
+    async function send({ channelId, sentMessage, intro = false }) {        
         const data = await $fetch('/api/send', {
             method: "POST",
 
@@ -16,13 +16,14 @@
         // Created a new chat
         if(data.chat) {
             chatList.value.push({ id: data.chat.id, title: data.chat.title });
+            await selectChat(data.chat.id);
         }
 
         // Reset input
         message.value = '';
 
         // Append new messages
-        if(!channelId) // Already in chat window
+        if(!channelId && !intro) // Already in chat window
             messages.value.push(...data.messages);
     }
 
@@ -48,8 +49,8 @@
         <p class="text-3xl">Welcome to Mostaelim</p>
 
         <div id="input-container" class="h-[50px] w-[500px] my-2 flex items-center rounded-3xl bg-white dark:bg-[#1e1e1e] p-1 shadow-2xl dark:shadow-none">
-            <input @keyup.enter="send" v-model="message" placeholder="Enter your message..." class="h-full w-full rounded-3xl p-2 border-none outline-none text-sm dark:bg-[#1e1e1e]" />
-            <UIcon @click="send" class="w-6 h-6 cursor-pointer hover:text-primary-500 transition-colors" name="material-symbols:send-outline-rounded" />
+            <input @keyup.enter="send({ intro: true })" v-model="message" placeholder="Enter your message..." class="h-full w-full rounded-3xl p-2 border-none outline-none text-sm dark:bg-[#1e1e1e]" />
+            <UIcon @click="send({ intro: true })" class="w-6 h-6 cursor-pointer hover:text-primary-500 transition-colors" name="material-symbols:send-outline-rounded" />
         </div>
 
         <div class="grid grid-cols-2 gap-2 w-[470px]">
