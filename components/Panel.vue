@@ -85,7 +85,8 @@
 <template>
     <div class="w-[250px] flex-shrink-0 rounded-2xl flex flex-col gap-4 mx-5 m-2 pt-3 px-4 bg-[#ffffff] dark:bg-[#1e1e1e] shadow-2xl dark:shadow-none">
         <div class="flex items-center">
-            <p @click="selectedChat = null" class="text-[28px] cursor-pointer pb-2">Mostaelim</p>
+            <img @click="selectedChat = null" class="hidden dark:block cursor-pointer" width="150" src="/Logo_dark.png" />
+            <img @click="selectedChat = null" class="block dark:hidden cursor-pointer" width="150" src="/Logo.png" />
 
             <ClientOnly>
                 <UButton class="ml-auto" :color="isDark ? 'gray' : 'white'" @click="isDark = !isDark" variant="ghost" :icon="isDark ? 'material-symbols:light-mode' : 'material-symbols:dark-mode'" />
