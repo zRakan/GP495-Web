@@ -101,7 +101,7 @@
             </PanelConfirm>
         </PanelSection>
 
-        <div class="overflow-y-auto">
+        <div id="chat-list" class="overflow-y-auto pb-5">
             <template v-for="chat in chatList">
                 <div class="flex items-center relative">
                     <div @click="selectedChat != chat.id && selectChat(chat.id)" class="cursor-pointer px-1 py-2 rounded-md flex w-full gap-1 items-center transition-colors hover:bg-primary-100 dark:hover:bg-primary-400 truncate">
@@ -149,3 +149,10 @@
         </div>
     </div>
 </template>
+
+<style scoped>
+    #chat-list {
+        -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+        mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+    }
+</style>
