@@ -80,6 +80,142 @@
         await clear();
         await navigateTo('/login');
     }
+
+    // Settings modal
+    const settings = ref(false);
+    const trainingData = ref(null);
+
+    async function openSettings() {
+        if(settings.value) {
+            return;
+        }
+
+        settings.value = true;
+
+        // Fetch data
+        const resp = await $fetch('/api/data');
+        trainingData.value = resp;
+    }
+
+    // Add data
+    const Question = ref("");
+    const Answer = ref("");
+
+    async function addQdrant() {
+        const resp = await $fetch('/api/data', {
+            method: "PUT",
+
+            body: {
+                question: Question.value,
+                answer: Answer.value
+            }
+        });
+
+        if(resp.id) { // Has been added
+            trainingData.value.push({
+                id: resp.id,
+                query: Question.value,
+                answer: Answer.value
+            });
+
+            // Reset data
+            Question.value = "";
+            Answer.value = "";
+        }
+    }
+
+    // Editing data
+    const selectedData = ref(null);
+    const editedData = ref({
+        query: "",
+        answer: "",
+    });
+    const isChanged = computed(() => {
+        const selected = selectedData.value;
+        const edited = editedData.value;
+
+        return selected && (selected.query != edited.query || selected.answer != edited.answer);
+    });
+
+    async function editingQdrant(data) {
+        if(selectedData.value == data) { // Disable editing
+            selectedData.value = null;
+            editedData.value = {
+                query: "",
+                answer: "",
+            }
+            
+            return;
+        }
+
+        selectedData.value = data;
+
+        const edit = editedData.value;
+
+        edit.query = data.query;
+        edit.answer = data.answer;
+    }
+
+    async function editedQdrant() {
+        const selected = selectedData.value;
+        const edited = editedData.value;
+
+
+        const resp = await $fetch('/api/data', {
+            method: "PATCH",
+
+            body: {
+                id: selected.id,
+                query: edited.query,
+                answer: edited.answer
+            }
+        });
+
+        if(resp.status) {
+            // Update reference
+            selected.query = edited.query;
+            selected.answer = edited.answer;
+
+            // Reset values
+            selectedData.value = null;
+            editedData.value = {
+                query: "",
+                answer: "",
+            }
+        }
+    }
+
+    // Deleta data
+    async function deleteQdrant(data) {
+        const resp = await $fetch('/api/data', {
+            method: "DELETE",
+
+            query: { id: data.id }
+        });
+
+        // Delete reference from training array
+        if(resp.status) {
+            trainingData.value = trainingData.value.filter(el => el !== data);
+        }
+    }
+
+    // When settings modal close
+    watch(settings, function(value) {
+        if(!value) {
+            settings.value = false;
+            trainingData.value = null;
+
+            // Reset inputs
+            Question.value = "";
+            Answer.value = "";
+
+            selectedData.value = null;
+            editedData.value = {
+                query: "",
+                answer: "",
+            }
+        }
+    });
 </script>
 
 <template>
@@ -121,12 +257,67 @@
         </div>
 
         <div class="mb-3 mt-auto">
-            <div class="flex items-center border-gray-500 border-[1px] rounded-2xl p-2 mb-2">
+            <div @click="openSettings()" class="flex items-center border-gray-500 border-[1px] rounded-2xl p-2 mb-2 cursor-pointer">
                 <div class="rounded-2xl w-[24px] h-[24px] flex justify-center items-center mr-4 bg-primary-500">
                     <UIcon name="solar-settings-outline" />
                 </div>
 
                 <p>Settings</p>
+
+                <UModal :ui="{ strategy: 'override', width: 'w-[80%]' }" v-model="settings">
+                    <div class="p-4">
+                        <div class="relative h-96">
+                            <p class="text-[32px] text-center pb-5">Manage Training Data {{ trainingData && `(${trainingData.length})` }}</p>
+
+                            <div class="h-80 overflow-auto">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Query</th>
+                                            <th>Answer</th>
+                                            <th>Operation</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <!-- Skeleton -->
+                                        <tr v-if="!trainingData">
+                                            <td><USkeleton class="w-full h-28 m-2" /></td>
+                                            <td><USkeleton class="w-full h-28 m-2" /></td>
+                                        </tr>
+
+                                        <tr v-else>
+                                            <td><input class="w-full" placeholder="Question" v-model="Question"></td>
+                                            <td><input class="w-full" placeholder="SQL Answer" v-model="Answer"></td>
+                                            <td class="!text-center">
+                                                <UIcon @click="addQdrant()" class="cursor-pointer hover:bg-green-500 w-5 h-5" name="ri-add-circle-line" />
+                                            </td>
+                                        </tr>
+
+                                        <template v-for="data in trainingData">
+                                          <tr class="text-sm">
+                                                <template v-if="data == selectedData">
+                                                    <td><input class="w-full" v-model="editedData.query" /></td>
+                                                    <td><input class="w-full" v-model="editedData.answer" /></td>
+                                                </template>
+
+                                                <template v-else>
+                                                    <td>{{ data.query }}</td>
+                                                    <td>{{ data.answer }}</td>
+                                                </template>
+
+                                                <td class="!text-center">
+                                                    <UIcon @click="deleteQdrant(data)" class="cursor-pointer hover:bg-red-500 w-5 h-5" name="solar-trash-bin-trash-outline" />
+                                                    <UIcon @click="isChanged ? editedQdrant() : editingQdrant(data)" class="cursor-pointer w-5 h-5" :class="isChanged ? 'hover:bg-green-600' : 'hover:bg-yellow-500'" :name="isChanged ? 'material-symbols:check-box-outline' : 'material-symbols:edit-square-outline'" />
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </UModal>
             </div>
             
             <UPopover :popper="{ placement: 'top-end' }" :ui="{ strategy: 'override', trigger: 'w-full rounded-2xl' }">
