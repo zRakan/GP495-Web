@@ -1,4 +1,9 @@
 <script setup>
+    useHead({
+        title: "Mostaelim Login"
+    });
+
+
     const state = ref({
         username: undefined,
         password: undefined
