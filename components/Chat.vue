@@ -40,7 +40,7 @@
     }
 
     // Get suggestions
-    const { data: suggestions } = await useFetch('/api/suggestions');
+    const { data: suggestions } = await useFetch('/api/suggestions', { server: false });
     async function suggestion(suggest) {        
         let data = await createChat({ display: false });
         if(data) {
@@ -66,7 +66,13 @@
         </div>
 
         <div class="grid grid-cols-2 gap-2 w-[470px]">
-            <UButton block size="xs" v-for="suggest in suggestions" @click=suggestion(suggest) :label="suggest" :disabled="states.pending" />
+            <template v-if="suggestions">
+                <UButton block size="xs" v-for="suggest in suggestions" @click=suggestion(suggest) :label="suggest" :disabled="states.pending" />
+            </template>
+
+            <template v-else>
+                <USkeleton class="h-[50px] w-full" v-for="x in 4" />
+            </template>
         </div>
 
         <div v-if="states.pending" class="lds-ellipsis">
