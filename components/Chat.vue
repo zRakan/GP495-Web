@@ -15,6 +15,8 @@
 
         if(sentMessage)
             message.value = sentMessage;
+
+        if(message.value.length == 0) return;
         
         states.value.pending = true;
         const data = await $fetch('/api/send', {
