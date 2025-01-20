@@ -1,10 +1,15 @@
 export default defineEventHandler(async function(event) {
-    const { secure } = await requireUserSession(event);
-
+    
     try {
+        await requireUserSession(event);
+
         const resp = await $fetch('http://localhost:8000/suggestions');
         return resp.questions;
     } catch(err) {
-        return [];
+        if(err.message == 'Unauthorized') {
+            setResponseStatus(event, 401);
+        }
+
+        return { status: false };
     }
 });

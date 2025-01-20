@@ -2,7 +2,7 @@ import { Chat } from "../models/Chats.model.js";
 
 function badInputs(event) {
     setResponseStatus(event, 400);
-    return { status: "Failed" }
+    return { status: false }
 }
 
 export default defineEventHandler(async function(event) {
@@ -21,11 +21,14 @@ export default defineEventHandler(async function(event) {
             chat = await Chat.deleteOne(filter);
         }
         
-        if(!chat || chat.deletedCount == 0) badInputs(event);
+        if(!chat || chat.deletedCount == 0) return badInputs(event);
 
-        return true;
+        return { status: true };
     } catch(err) {
-        console.log(err);
-        return false;
+        if(err.message == 'Unauthorized') {
+            setResponseStatus(event, 401);
+        }
+
+        return { status: false };
     }
 });

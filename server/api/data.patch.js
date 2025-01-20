@@ -1,17 +1,25 @@
 export default defineEventHandler(async function(event) {
-    const { secure } = await requireUserSession(event);
+    try {
+        await requireUserSession(event);
 
-    const body = await readBody(event);
+        const body = await readBody(event);
 
-    const resp = await $fetch('http://localhost:8000/editData', {
-        method: "POST",
+        const resp = await $fetch('http://localhost:8000/editData', {
+            method: "POST",
 
-        body: {
-            id: body.id,
-            query: body.query,
-            answer: body.answer
+            body: {
+                id: body.id,
+                query: body.query,
+                answer: body.answer
+            }
+        });
+
+        return { status: resp.status == "completed" };
+    } catch(err) {
+        if(err.message == 'Unauthorized') {
+            setResponseStatus(event, 401);
         }
-    });
 
-    return { status: resp.status == "completed" };
+        return { status: false }
+    }
 });

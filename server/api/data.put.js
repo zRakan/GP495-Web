@@ -1,16 +1,24 @@
 export default defineEventHandler(async function(event) {
-    const { secure } = await requireUserSession(event);
+    try {
+        await requireUserSession(event);
 
-    const body = await readBody(event);
+        const body = await readBody(event);
 
-    const resp = await $fetch('http://localhost:8000/addData', {
-        method: "POST",
+        const resp = await $fetch('http://localhost:8000/addData', {
+            method: "POST",
 
-        body: {
-            question: body.question,
-            answer: body.answer
+            body: {
+                question: body.question,
+                answer: body.answer
+            }
+        });
+
+        return { id: resp.id[0] };
+    } catch(err) {
+        if(err.message == 'Unauthorized') {
+            setResponseStatus(event, 401);
         }
-    });
 
-    return { id: resp.id[0] };
+        return { status: false }
+    }
 });

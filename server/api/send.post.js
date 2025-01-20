@@ -2,7 +2,7 @@ import { Chat } from "../models/Chats.model.js";
 
 function badInputs(event) {
     setResponseStatus(event, 400);
-    return { status: "Failed" }
+    return { status: false }
 }
 
 function validJSON(data) {
@@ -14,10 +14,10 @@ function validJSON(data) {
     }
 }
 
-export default defineEventHandler(async function(event) {
-    const { secure } = await requireUserSession(event);
-    
+export default defineEventHandler(async function(event) {    
     try {
+        const { secure } = await requireUserSession(event);
+
         const body = await readBody(event);
         if(!body.message) return badInputs(event);
 
@@ -77,6 +77,10 @@ export default defineEventHandler(async function(event) {
 
         return { ...returnedData };
     } catch(err) {
-        return {}
+        if(err.message == 'Unauthorized') {
+            setResponseStatus(event, 401);
+        }
+        
+        return { status: false }
     }
 });

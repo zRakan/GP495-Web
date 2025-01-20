@@ -2,7 +2,7 @@ import { User } from "../models/User.model";
 
 function badInputs(event) {
     setResponseStatus(event, 400);
-    return { status: "Failed" }
+    return { status: false }
 }
 
 export default defineEventHandler(async function(event) {

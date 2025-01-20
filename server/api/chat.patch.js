@@ -2,7 +2,7 @@ import { Chat } from "../models/Chats.model.js";
 
 function badInputs(event) {
     setResponseStatus(event, 400);
-    return { status: "Failed" }
+    return { status: false }
 }
 
 export default defineEventHandler(async function(event) {
@@ -15,8 +15,12 @@ export default defineEventHandler(async function(event) {
         const chat = await Chat.updateOne({ id: body.id, author: secure.authorId }, { title: body.title });
         console.log(chat)
         
-        return true
+        return { status: true }
     } catch(err) {
-        return false;
+        if(err.message == 'Unauthorized') {
+            setResponseStatus(event, 401);
+        }
+
+        return { status: false };
     }
 });

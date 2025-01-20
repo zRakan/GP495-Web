@@ -12,6 +12,10 @@ export default defineEventHandler(async function(event) {
             title: chat.title
         }
     } catch(err) {
-        return false;
+        if(err.message == 'Unauthorized') {
+            setResponseStatus(event, 401);
+        }
+        
+        return { status: false };
     }
 });
