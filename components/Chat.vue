@@ -68,7 +68,7 @@
         </div>
 
         <div class="grid grid-cols-2 gap-2 w-[470px]">
-            <template v-if="suggestions">
+            <template v-if="suggestions && suggestions.length > 0">
                 <UButton block size="xs" v-for="suggest in suggestions" @click=suggestion(suggest) :label="suggest" :disabled="states.pending" />
             </template>
 
