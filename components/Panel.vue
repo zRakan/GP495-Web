@@ -208,10 +208,16 @@
     }
 
     // Add data
+    const trainingPending = ref(false);
     const Question = ref("");
     const Answer = ref("");
 
     async function addQdrant() {
+        if(trainingPending.value) return notification.add({ title: 'Please wait for previous operation '});
+
+        if(Question.value.length == 0 || Answer.value.length == 0) return notification.add({ title: 'Invalid training data' });
+
+        trainingPending.value = true;
         const resp = await $fetch('/api/data', {
             method: "PUT",
 
@@ -222,6 +228,7 @@
 
             ignoreResponseError: true
         });
+        trainingPending.value = false;
 
         if(resp.id) { // Has been added
             trainingData.value.push({
