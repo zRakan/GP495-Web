@@ -5,10 +5,19 @@ function badInputs(event) {
     return { status: false }
 }
 
+import { z } from 'zod';
+const queryValidation = z.object({
+    id: z.string().uuid()
+})
+
 export default defineEventHandler(async function(event) {
     try {
         const { secure } = await requireUserSession(event);
-        const { id } = getQuery(event);
+        
+        const query = await getValidatedQuery(event, queryValidation.safeParse);
+        if(!query.success) return badInputs(event);
+
+        const { id } = query.data;
 
         const filter = { author: secure.authorId }
         if(id != -1) // Delete specific chat

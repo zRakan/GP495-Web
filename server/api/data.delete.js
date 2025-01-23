@@ -1,8 +1,21 @@
+import { z } from "zod";
+const queryValidation = z.object({
+    id: z.string().uuid()
+});
+
+function badInputs(event) {
+    setResponseStatus(event, 400);
+    return { status: false }
+}
+
 export default defineEventHandler(async function(event) {
     try {
         await requireUserSession(event);
 
-        const { id } = getQuery(event);
+        const query = await getValidatedQuery(event, queryValidation.safeParse);
+        if(!query.success) return badInputs(event);
+
+        const { id } = query.data;
 
         const resp = await $fetch('http://localhost:8000/removeData', {
             method: "POST",

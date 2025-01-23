@@ -1,17 +1,28 @@
+import { z } from "zod";
+const bodyValidation = z.object({
+    id: z.string().uuid(),
+    query: z.string().nonempty(),
+    answer: z.string().nonempty()
+});
+
+function badInputs(event) {
+    setResponseStatus(event, 400);
+    return { status: false }
+}
+
 export default defineEventHandler(async function(event) {
     try {
         await requireUserSession(event);
 
-        const body = await readBody(event);
+        const body = await readValidatedBody(event, bodyValidation.safeParse);
+        if(!body.success) return badInputs(event);
+
+        const { id, query, answer } = body.data;
 
         const resp = await $fetch('http://localhost:8000/editData', {
             method: "POST",
 
-            body: {
-                id: body.id,
-                query: body.query,
-                answer: body.answer
-            }
+            body: { id, query, answer }
         });
 
         return { status: resp.status == "completed" };

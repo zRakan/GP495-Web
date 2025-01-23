@@ -5,15 +5,23 @@ function badInputs(event) {
     return { status: false }
 }
 
+import { z } from "zod";
+const bodyValidation = z.object({
+    id: z.string().uuid()
+});
+
 export default defineEventHandler(async function(event) {
     try {
         const { secure } = await requireUserSession(event);
         if(secure.role != 'admin') return badInputs(event);
 
-        const body = await readBody(event);
+        const body = await readValidatedBody(event, bodyValidation.safeParse);
+        if(!body.success) return badInputs(event);
+
+        const { id } = body.data;
 
         // Check if username is already used
-        const deletedUser = await User.deleteOne({ id: body.id });
+        const deletedUser = await User.deleteOne({ id });
         if(deletedUser.deletedCount == 0) return { status: false }
 
         return { status: true };

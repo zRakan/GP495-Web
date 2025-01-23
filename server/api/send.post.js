@@ -14,19 +14,27 @@ function validJSON(data) {
     }
 }
 
+import { z } from "zod";
+const bodyValidation = z.object({
+    id: z.string().uuid().nullable(),
+    message: z.string().nonempty()
+});
+
 export default defineEventHandler(async function(event) {    
     try {
         const { secure } = await requireUserSession(event);
 
-        const body = await readBody(event);
-        if(!body.message) return badInputs(event);
+        const body = await readValidatedBody(event, bodyValidation.safeParse);
+        if(!body.success) return badInputs(event);
+
+        const { id, message } = body.data;
 
         // Check/Create a chat
         let chat;
-        if(!body.id) {
+        if(!id) {
             chat = new Chat({ author: secure.authorId })
         } else {
-            chat = await Chat.findOne({ id: body.id });
+            chat = await Chat.findOne({ id });
             if(!chat) { // Invalid chat
                 chat = new Chat({ author: secure.authorId })
             }
@@ -38,7 +46,8 @@ export default defineEventHandler(async function(event) {
 
             body: {
                 history: chat.history,
-                message: body.message
+
+                message
             }
         });
 
@@ -73,7 +82,7 @@ export default defineEventHandler(async function(event) {
         await chat.save();
         
         const returnedData = { messages }
-        if(!body.id) returnedData.chat = { id: chat.id, title: chat.title };
+        if(!id) returnedData.chat = { id: chat.id, title: chat.title };
 
         return { ...returnedData };
     } catch(err) {

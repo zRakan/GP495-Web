@@ -17,7 +17,8 @@
     "nuxt-plotly": "1.0.12",
     "vue": "latest",
     "vue-router": "latest",
-    "vue-showdown": "^4.2.0"
+    "vue-showdown": "^4.2.0",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@iconify-json/line-md": "^1.2.4",

@@ -5,22 +5,29 @@ function badInputs(event) {
     return { status: false }
 }
 
-export default defineEventHandler(async function(event) {
-    const body = await readBody(event);
+import { z } from "zod";
+const bodyValidation = z.object({
+    username: z.string().nonempty(),
+    password: z.string().min(8)
+});
 
-    if(!body || !body.username || !body.password) return badInputs(event); 
+export default defineEventHandler(async function(event) {
+    const body = await readValidatedBody(event, bodyValidation.safeParse);
+    if(!body.success) return badInputs(event);
+
+    const { username, password } = body.data;
 
     try {
-        const user = await User.findOne({ username: body.username });
+        const user = await User.findOne({ username });
         if(!user) return { status: false, message: "Invalid Username/Password" }
 
-        const isPasswordMatch = await user.passwordMatch(body.password);
+        const isPasswordMatch = await user.passwordMatch(password);
         if(!isPasswordMatch) return { status: false, message: "Invalid Username/Password" }
 
         // Valid Username & Password
         await setUserSession(event, {
             user: {
-                name: user.username
+                name: username
             },
 
             secure: {

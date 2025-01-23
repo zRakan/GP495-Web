@@ -137,7 +137,7 @@
 
             notification.add({ title: 'User has been added successfully' });
         } else {
-            notification.add({ title: 'Something went wrong' });
+            notification.add({ title: resp.message ? resp.message : 'Something went wrong' });
         }
 
         // Reset inputs
@@ -430,9 +430,9 @@
             </UPopover>
 
             <!-- Account Settings Modal -->
-            <UModal :ui="{ strategy: 'override', width: 'w-[50%]' }" v-model="accountSettings">
+            <UModal :ui="{ strategy: 'override', width: 'w-[40%]' }" v-model="accountSettings">
                 <div class="p-4">
-                    <div class="relative h-96">
+                    <div class="relative h-auto">
                         <p class="text-[32px] text-center pb-5">Manage Accounts</p>
 
                         <div class="flex items-center justify-center gap-5 pb-5">
@@ -478,7 +478,7 @@
             <!-- Training Settings modal -->
             <UModal :ui="{ strategy: 'override', width: 'w-[80%]' }" v-model="trainingSettings">
                 <div class="p-4">
-                    <div class="relative h-96">
+                    <div class="relative h-auto">
                         <p class="text-[32px] text-center pb-5">Manage Training Data {{ trainingData && `(${trainingData.length})` }}</p>
 
                         <div class="h-80 overflow-auto">

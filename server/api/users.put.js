@@ -5,24 +5,31 @@ function badInputs(event) {
     return { status: false }
 }
 
+import { z } from "zod";
+const bodyValidation = z.object({
+    username: z.string().nonempty(),
+    password: z.string().min(8),
+    role: z.enum(['user', 'admin'])
+});
+
 export default defineEventHandler(async function(event) {
     try {
         const { secure } = await requireUserSession(event);
         if(secure.role != 'admin') return badInputs(event);
 
-        const body = await readBody(event);
-        if(body.password.length < 8) return badInputs(event);
+        const body = await readValidatedBody(event, bodyValidation.safeParse);
+        if(!body.success) return badInputs(event);
 
+        const { username, password, role } = body.data;
+        
         // Check if username is already used
-        const userFound = await User.findOne({ username: body.username });
-        if(userFound) return { status: false, message: 'Username already is used' }
+        const userFound = await User.findOne({ username });
+        if(userFound) {
+            setResponseStatus(event, 400);
+            return { status: false, message: 'Username already is used' }
+        }
 
-        const newUser = new User({
-            username: body.username,
-            password: body.password,
-
-            role: body.role
-        });
+        const newUser = new User({ username, password, role });
 
         await newUser.save();
         
