@@ -1,5 +1,6 @@
 <script setup>
     const { user, clear } = useUserSession();
+    const notification = useToast();
 
     // Get chats
     const chatList = useState('chat:list', () => { return null });
@@ -23,17 +24,31 @@
 
     // Confirmations
     async function deleteChat(id, close) {
+        if(chatList.value.length == 0) {
+            notification.add({ title: 'Chat list is empty' });
+
+            if(close) close();
+
+            return;
+        }
+
         if(id) {
             const data = await $fetch('/api/chat', {
                 method: "DELETE",
 
-                query: { id } // All chats
+                query: { id }, // All chats
+
+                ignoreResponseError: true
             });
 
-            if(data) {
+            if(data.status) {
                 chatList.value = id == -1 ? [] : chatList.value.filter(el => el.id != id);
                 selectedChat.value = null;
                 history.value = [];
+
+                notification.add({ title: id == -1 ? 'All chats have been deleted' : 'Chat has been deleted' });
+            } else {
+                notification.add({ title: 'Something went wrong' })
             }
         }
 
@@ -46,8 +61,6 @@
     const currentTitle = ref(null);
     async function toggleEdit(id, title) {
         if(editing.value) { // Finished edit
-            console.log(currentTitle.value);
-
             if(currentTitle.value != title) { // Changed
                 const data = await $fetch('/api/chat', {
                     method: "PATCH",
@@ -55,13 +68,19 @@
                     body: {
                         id,
                         title: currentTitle.value
-                    }
+                    },
+
+                    ignoreResponseError: true
                 });
-                
-                for(let chat of chatList.value) {
-                    if(chat.id == id) {
-                        chat.title = currentTitle.value;
-                        break;
+
+                if(data.status == false) {
+                    notification.add({ title: 'Something went wrong' });
+                } else {
+                    for(let chat of chatList.value) {
+                        if(chat.id == id) {
+                            chat.title = currentTitle.value;
+                            break;
+                        }
                     }
                 }
             }
@@ -114,6 +133,10 @@
                 id: resp.id,
                 username: usernameInput.value
             });
+
+            notification.add({ title: 'User has been added successfully' });
+        } else {
+            notification.add({ title: 'Something went wrong' });
         }
 
         // Reset inputs
@@ -132,6 +155,9 @@
 
         if(resp.status) {
             users.value = users.value.filter(el => el !== ref);
+            notification.add({ title: 'User has been deleted successfully' });
+        } else {
+            notification.add({ title: 'Something went wrong' });
         }
     }
 
@@ -148,6 +174,8 @@
         
         if(data.status == false) { // Unauthorized
             accountSettings.value = false;
+            notification.add({ title: 'Something went wrong' });
+
             return;
         }
 
@@ -170,7 +198,12 @@
         trainingSettings.value = true;
 
         // Fetch data
-        const resp = await $fetch('/api/data');
+        const resp = await $fetch('/api/data', { ignoreResponseError: true });
+        if(resp.status == false) {
+            notification.add({ title: 'Something went wrong' });
+            return;
+        }
+
         trainingData.value = resp;
     }
 
@@ -185,7 +218,9 @@
             body: {
                 question: Question.value,
                 answer: Answer.value
-            }
+            },
+
+            ignoreResponseError: true
         });
 
         if(resp.id) { // Has been added
@@ -198,6 +233,10 @@
             // Reset data
             Question.value = "";
             Answer.value = "";
+
+            notification.add({ title: 'Training data has been added successfully' });
+        } else {
+            notification.add({ title: 'Something went wrong' });
         }
     }
 
@@ -245,7 +284,9 @@
                 id: selected.id,
                 query: edited.query,
                 answer: edited.answer
-            }
+            },
+
+            ignoreResponseError: true
         });
 
         if(resp.status) {
@@ -259,6 +300,10 @@
                 query: "",
                 answer: "",
             }
+
+            notification.add({ title: 'Training data has been edited successfully' });
+        } else {
+            notification.add({ title: 'Something went wrong' });
         }
     }
 
@@ -273,6 +318,9 @@
         // Delete reference from training array
         if(resp.status) {
             trainingData.value = trainingData.value.filter(el => el !== data);
+            notification.add({ title: 'Training data has been deleted successfully' });
+        } else {
+            notification.add({ title: 'Something went wrong' });
         }
     }
 

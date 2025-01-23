@@ -1,4 +1,6 @@
 <script setup>
+    const notification = useToast();
+
     import { VueShowdown } from 'vue-showdown';
 
     const states = ref({
@@ -11,7 +13,7 @@
     
     const message = ref('');
     async function send({ channelId, sentMessage, intro = false }) {    
-        if(states.value.pending) return;
+        if(states.value.pending) return notification.add({ title: 'Wait for previous message to be processed' });
 
         if(sentMessage)
             message.value = sentMessage;
@@ -22,13 +24,17 @@
         const data = await $fetch('/api/send', {
             method: "POST",
 
-            body: { id: channelId || selectedChat.value, message: sentMessage || message.value }
+            body: { id: channelId || selectedChat.value, message: sentMessage || message.value },
+
+            ignoreResponseError: true
         });
 
         // Created a new chat
         if(data.chat) {
             chatList.value.push({ id: data.chat.id, title: data.chat.title });
             await selectChat(data.chat.id);
+        } else if(data.status == false) {
+            notification.add({ title: 'Something went wrong' });
         }
 
         states.value.pending = false;
