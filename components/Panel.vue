@@ -114,7 +114,8 @@
     const selectedRole = ref(roles[0]);
 
     async function addUser() {
-        if(passwordInput.value.length < 8) return;
+        if(usernameInput.value == "" || passwordInput.value == "" || !roles.includes(selectedRole.value)) return notification.add({ title: 'Invalid user data' });
+        if(passwordInput.value.length < 8) return notification.add({ title: 'Password must be 8 length or more' });
 
         const resp = await $fetch('/api/users', {
             method: "PUT",
