@@ -83,14 +83,91 @@
 
     // Settings modal
     const settings = ref(false);
-    const trainingData = ref(null);
 
-    async function openSettings() {
-        if(settings.value) {
+    // Account settings
+    const accountSettings = ref(false);
+    const users = ref(null);
+    const roles = ['user', 'admin'];
+
+
+    const usernameInput = ref("");
+    const passwordInput = ref("");
+    const selectedRole = ref(roles[0]);
+
+    async function addUser() {
+        if(passwordInput.value.length < 8) return;
+
+        const resp = await $fetch('/api/users', {
+            method: "PUT",
+
+            body: {
+                username: usernameInput.value,
+                password: passwordInput.value,
+                role: selectedRole.value
+            },
+
+            ignoreResponseError: true
+        });
+
+        if(resp.id) { // User has been added
+            users.value.push({
+                id: resp.id,
+                username: usernameInput.value
+            });
+        }
+
+        // Reset inputs
+        usernameInput.value = "";
+        passwordInput.value = "";
+    }
+
+    async function deleteUser(id, ref) {
+        const resp = await $fetch('/api/users', {
+            method: "DELETE",
+
+            body: { id },
+
+            ignoreResponseError: true
+        });
+
+        if(resp.status) {
+            users.value = users.value.filter(el => el !== ref);
+        }
+    }
+
+    async function openAccountSettings() {
+        if(accountSettings.value) return;
+
+        // Close popper
+        settings.value = false;
+
+        accountSettings.value = true;
+
+        // Fetch users
+        const data = await $fetch('/api/users', { ignoreResponseError: true });
+        
+        if(data.status == false) { // Unauthorized
+            accountSettings.value = false;
             return;
         }
 
-        settings.value = true;
+        users.value = data.users;
+    }
+
+    // Training settings
+    const trainingSettings = ref(false);
+    const trainingData = ref(null);
+
+    async function openTrainingSettings() {
+        if(trainingSettings.value) {
+            return;
+        }
+
+        
+        // Close popper
+        settings.value = false;
+
+        trainingSettings.value = true;
 
         // Fetch data
         const resp = await $fetch('/api/data');
@@ -200,9 +277,9 @@
     }
 
     // When settings modal close
-    watch(settings, function(value) {
+    watch(trainingSettings, function(value) {
         if(!value) {
-            settings.value = false;
+            trainingSettings.value = false;
             trainingData.value = null;
 
             // Reset inputs
@@ -257,71 +334,29 @@
         </div>
 
         <div class="mb-3 mt-auto">
-            <div @click="openSettings()" class="flex items-center border-gray-500 border-[1px] rounded-2xl p-2 mb-2 cursor-pointer">
-                <div class="rounded-2xl w-[24px] h-[24px] flex justify-center items-center mr-4 bg-primary-500">
-                    <UIcon name="solar-settings-outline" />
+            <UDivider size="2xs" class="pb-3" :ui="{ strategy: 'override', border: { base: 'flex border-gray-500' } }" />
+
+            <UPopover v-model:open="settings" :popper="{ placement: 'top-end' }" :ui="{ strategy: 'override', trigger: 'w-full rounded-2xl' }">
+                <div class="flex items-center hover:bg-gray-800 transition-colors rounded-xl p-2 mb-2 cursor-pointer">
+                    <div class="rounded-2xl w-[24px] h-[24px] flex justify-center items-center mr-4 bg-primary-500">
+                        <UIcon name="solar-settings-outline" />
+                    </div>
+
+                    <p>Settings</p>
                 </div>
 
-                <p>Settings</p>
-
-                <UModal :ui="{ strategy: 'override', width: 'w-[80%]' }" v-model="settings">
-                    <div class="p-4">
-                        <div class="relative h-96">
-                            <p class="text-[32px] text-center pb-5">Manage Training Data {{ trainingData && `(${trainingData.length})` }}</p>
-
-                            <div class="h-80 overflow-auto">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Query</th>
-                                            <th>Answer</th>
-                                            <th>Operation</th>
-                                        </tr>
-                                    </thead>
-
-                                    <tbody>
-                                        <!-- Skeleton -->
-                                        <tr v-if="!trainingData">
-                                            <td><USkeleton class="w-full h-28 m-2" /></td>
-                                            <td><USkeleton class="w-full h-28 m-2" /></td>
-                                        </tr>
-
-                                        <tr v-else>
-                                            <td><input class="w-full" placeholder="Question" v-model="Question"></td>
-                                            <td><input class="w-full" placeholder="SQL Answer" v-model="Answer"></td>
-                                            <td class="!text-center">
-                                                <UIcon @click="addQdrant()" class="cursor-pointer hover:bg-green-500 w-5 h-5" name="ri-add-circle-line" />
-                                            </td>
-                                        </tr>
-
-                                        <template v-for="data in trainingData">
-                                          <tr class="text-sm">
-                                                <template v-if="data == selectedData">
-                                                    <td><input class="w-full" v-model="editedData.query" /></td>
-                                                    <td><input class="w-full" v-model="editedData.answer" /></td>
-                                                </template>
-
-                                                <template v-else>
-                                                    <td>{{ data.query }}</td>
-                                                    <td>{{ data.answer }}</td>
-                                                </template>
-
-                                                <td class="!text-center">
-                                                    <UIcon @click="deleteQdrant(data)" class="cursor-pointer hover:bg-red-500 w-5 h-5" name="solar-trash-bin-trash-outline" />
-                                                    <UIcon @click="isChanged ? editedQdrant() : editingQdrant(data)" class="cursor-pointer w-5 h-5" :class="isChanged ? 'hover:bg-green-600' : 'hover:bg-yellow-500'" :name="isChanged ? 'material-symbols:check-box-outline' : 'material-symbols:edit-square-outline'" />
-                                                </td>
-                                            </tr>
-                                        </template>
-                                    </tbody>
-                                </table>
-                            </div>
+                <template #panel>
+                    <div class="p-2">
+                        <div class="flex gap-5 items-center justify-center">
+                            <UIcon name="material-symbols:folder-managed-outline-sharp" class="cursor-pointer hover:bg-yellow-500 transition-colors" @click="openTrainingSettings()" />
+                            <UIcon name="material-symbols:manage-accounts-outline" class="cursor-pointer hover:bg-emerald-500 transition-colors" @click="openAccountSettings()" />
                         </div>
                     </div>
-                </UModal>
-            </div>
+                </template>
+            </UPopover>
             
             <UPopover :popper="{ placement: 'top-end' }" :ui="{ strategy: 'override', trigger: 'w-full rounded-2xl' }">
-                <div class="flex items-center border-gray-500 border-[1px] rounded-2xl p-2">
+                <div class="flex items-center hover:bg-gray-800 transition-colors rounded-xl p-2">
                     <div class="rounded-2xl w-[24px] h-[24px] flex justify-center items-center mr-4 bg-primary-500">
                         <UIcon name="material-symbols:account-circle" />
                     </div>
@@ -332,12 +367,112 @@
                 <template #panel>
                     <div class="p-2">
                         <div class="flex flex-row items-center justify-center">
-                            <p class="text-sm">Logout?</p>
-                            <UButton @click="logout()" variant="link" color="red" label="Yes" />
+                            <UButton @click="logout()" variant="link" color="red" label="Logout" />
                         </div>
                     </div>
                 </template>
             </UPopover>
+
+            <!-- Account Settings Modal -->
+            <UModal :ui="{ strategy: 'override', width: 'w-[50%]' }" v-model="accountSettings">
+                <div class="p-4">
+                    <div class="relative h-96">
+                        <p class="text-[32px] text-center pb-5">Manage Accounts</p>
+
+                        <div class="flex items-center justify-center gap-5 pb-5">
+                            <UInput placeholder="Username" v-model="usernameInput" />
+                            <UInput placeholder="Password" v-model="passwordInput" />
+                            <USelect v-model="selectedRole" :options="roles" />
+
+                            <UIcon @click="addUser()" class="cursor-pointer hover:bg-green-500 w-5 h-5" name="ri-add-circle-line" />
+                        </div>
+
+                        <div class="h-80 overflow-auto">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Operation</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <!-- Skeleton -->
+                                    <tr v-if="!users">
+                                        <td><USkeleton class="w-full h-8 m-2" /></td>
+                                        <td><USkeleton class="w-full h-8 m-2" /></td>
+                                    </tr>
+
+                                    <template v-for="user in users">
+                                        <tr>
+                                            <td class="!text-center">{{ user.username }}</td>
+
+                                            <td class="!text-center">
+                                                <UIcon @click="deleteUser(user.id, user)" class="cursor-pointer hover:bg-red-500 w-5 h-5" name="solar-trash-bin-trash-outline" />
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </UModal>
+
+            <!-- Training Settings modal -->
+            <UModal :ui="{ strategy: 'override', width: 'w-[80%]' }" v-model="trainingSettings">
+                <div class="p-4">
+                    <div class="relative h-96">
+                        <p class="text-[32px] text-center pb-5">Manage Training Data {{ trainingData && `(${trainingData.length})` }}</p>
+
+                        <div class="h-80 overflow-auto">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Query</th>
+                                        <th>Answer</th>
+                                        <th>Operation</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <!-- Skeleton -->
+                                    <tr v-if="!trainingData">
+                                        <td><USkeleton class="w-full h-28 m-2" /></td>
+                                    </tr>
+
+                                    <tr v-else>
+                                        <td><input class="w-full" placeholder="Question" v-model="Question"></td>
+                                        <td><input class="w-full" placeholder="SQL Answer" v-model="Answer"></td>
+                                        <td class="!text-center">
+                                            <UIcon @click="addQdrant()" class="cursor-pointer hover:bg-green-500 w-5 h-5" name="ri-add-circle-line" />
+                                        </td>
+                                    </tr>
+
+                                    <template v-for="data in trainingData">
+                                        <tr class="text-sm">
+                                            <template v-if="data == selectedData">
+                                                <td><input class="w-full" v-model="editedData.query" /></td>
+                                                <td><input class="w-full" v-model="editedData.answer" /></td>
+                                            </template>
+
+                                            <template v-else>
+                                                <td>{{ data.query }}</td>
+                                                <td>{{ data.answer }}</td>
+                                            </template>
+
+                                            <td class="!text-center">
+                                                <UIcon @click="deleteQdrant(data)" class="cursor-pointer hover:bg-red-500 w-5 h-5" name="solar-trash-bin-trash-outline" />
+                                                <UIcon @click="isChanged ? editedQdrant() : editingQdrant(data)" class="cursor-pointer w-5 h-5" :class="isChanged ? 'hover:bg-green-600' : 'hover:bg-yellow-500'" :name="isChanged ? 'material-symbols:check-box-outline' : 'material-symbols:edit-square-outline'" />
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </UModal>
         </div>
     </div>
 </template>
