@@ -393,7 +393,7 @@
             <UDivider size="2xs" class="pb-3" :ui="{ strategy: 'override', border: { base: 'flex border-gray-500' } }" />
 
             <UPopover v-model:open="settings" :popper="{ placement: 'top-end' }" :ui="{ strategy: 'override', trigger: 'w-full rounded-2xl' }">
-                <div class="flex items-center hover:bg-gray-800 transition-colors rounded-xl p-2 mb-2 cursor-pointer">
+                <div class="flex items-center hover:bg-primary-100 hover:dark:bg-gray-800 transition-colors rounded-xl p-2 mb-2 cursor-pointer">
                     <div class="rounded-2xl w-[24px] h-[24px] flex justify-center items-center mr-4 bg-primary-500">
                         <UIcon name="solar-settings-outline" />
                     </div>
@@ -412,7 +412,7 @@
             </UPopover>
             
             <UPopover :popper="{ placement: 'top-end' }" :ui="{ strategy: 'override', trigger: 'w-full rounded-2xl' }">
-                <div class="flex items-center hover:bg-gray-800 transition-colors rounded-xl p-2">
+                <div class="flex items-center hover:bg-primary-100 hover:dark:bg-gray-800 transition-colors rounded-xl p-2">
                     <div class="rounded-2xl w-[24px] h-[24px] flex justify-center items-center mr-4 bg-primary-500">
                         <UIcon name="material-symbols:account-circle" />
                     </div>
