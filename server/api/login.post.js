@@ -27,7 +27,8 @@ export default defineEventHandler(async function(event) {
         // Valid Username & Password
         await setUserSession(event, {
             user: {
-                name: username
+                name: username,
+                role: user.role
             },
 
             secure: {
