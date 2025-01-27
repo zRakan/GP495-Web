@@ -78,7 +78,7 @@
                 <UButton block size="xs" v-for="suggest in suggestions" @click=suggestion(suggest) :label="suggest" :disabled="states.pending" />
             </template>
 
-            <template v-else>
+            <template v-else-if="!suggestions">
                 <USkeleton class="h-[50px] w-full" v-for="x in 4" />
             </template>
         </div>
