@@ -1,3 +1,4 @@
+import { Chat } from "../models/Chats.model.js";
 import { User } from "../models/User.model.js";
 import { z } from "zod";
 
@@ -23,6 +24,9 @@ export default defineEventHandler(async function(event) {
         // Check if username is already used
         const deletedUser = await User.deleteUser({ id });
         if(deletedUser == null) return { status: false }
+
+        // Delete all chats related to the user
+        await Chat.deleteMany({ author: id });
 
         return { status: true };
     } catch(err) {
