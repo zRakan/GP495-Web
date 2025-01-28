@@ -6,12 +6,29 @@ function badInputs(event) {
     return { status: false }
 }
 
+function rateLimit(event) {
+    setResponseStatus(event, 429);
+    return { status: false, message: "Too Many Requests" }
+}
+
 const bodyValidation = z.object({
     username: z.string().nonempty(),
     password: z.string().min(8)
 });
 
 export default defineEventHandler(async function(event) {
+    // Rate limiting (5 times)
+    const IP = getRequestIP(event, { xForwardedFor: true });
+    const redis = useRedis();
+    
+    const IP_KEY = `Mostaelim:ratelimit:${IP}`;
+    const times = await redis.get(IP_KEY);
+    if(times) {
+        if(times == 0) return rateLimit(event);
+
+        await redis.decr(IP_KEY);
+    } else await redis.set(IP_KEY, 4, { EX: 300 });
+
     const body = await readValidatedBody(event, bodyValidation.safeParse);
     if(!body.success) return badInputs(event);
 

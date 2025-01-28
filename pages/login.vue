@@ -23,7 +23,9 @@
         const resp = await $fetch('/api/login', {
             method: "POST",
 
-            body: { username: data.username, password: data.password }
+            body: { username: data.username, password: data.password },
+
+            ignoreResponseError: true
         });
         pending.value = false;        
 
