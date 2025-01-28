@@ -21,8 +21,8 @@ export default defineEventHandler(async function(event) {
         const { id } = body.data;
 
         // Check if username is already used
-        const deletedUser = await User.deleteOne({ id });
-        if(deletedUser.deletedCount == 0) return { status: false }
+        const deletedUser = await User.deleteUser({ id });
+        if(deletedUser == null) return { status: false }
 
         return { status: true };
     } catch(err) {

@@ -25,21 +25,38 @@ const schema = new Schema({
     }
 });
 
+/*
+    Static functions
+*/
 
-/**
- * Check if password matches the user's password
- * @param {string} password
- * @returns {Promise<boolean>}
- */
-schema.methods.passwordMatch = async function(password) {
-    const user = this;
+// Find user and cache it
+schema.statics.findUser = async function({ username, cache = true }) {
+    const redis = useRedis();
+    const FIND_USER = `Mostaelim:Users:find:${username}`;
 
-    return await verifyPassword(user.password, password);
-};
+    let user = JSON.parse(await redis.get(FIND_USER));
+    if(user == null) {
+        user = await User.findOne({ username });
 
-schema.methods.isAdmin = function() {
-    const user = this;
-    return user.role == 'admin';
+        if(user || cache) // Don't cache until user is found or cache is forced
+            await redis.set(FIND_USER, JSON.stringify((user && user.toJSON()) || false), { EX: 300 });
+
+        if(!user) return false;
+    }
+
+    return user;
+}
+
+// Delete user
+schema.statics.deleteUser = async function({ id }) {
+    const user = await User.findOneAndDelete({ id });
+
+    // Remove from cache
+    if(user) {
+        await useRedis().del(`Mostaelim:Users:find:${user.username}`)
+    }
+    
+    return user;
 }
 
 schema.pre('save', async function() {
@@ -47,6 +64,9 @@ schema.pre('save', async function() {
 
     if(user.isModified('password'))
         user.password = await hashPassword(user.password);
+
+    // Cache it
+    await useRedis().set(`Mostaelim:Users:find:${user.username}`, JSON.stringify(this.toJSON()), { EX: 300 });
 });
 
 export const User = model('User', schema);

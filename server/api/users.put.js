@@ -23,7 +23,7 @@ export default defineEventHandler(async function(event) {
         const { username, password, role } = body.data;
         
         // Check if username is already used
-        const userFound = await User.findOne({ username });
+        const userFound = await User.findUser({ username, cache: false });
         if(userFound) {
             setResponseStatus(event, 400);
             return { status: false, message: 'Username already is used' }

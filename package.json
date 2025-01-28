@@ -17,6 +17,7 @@
     "nuxt": "^3.14.1592",
     "nuxt-auth-utils": "^0.5.7",
     "nuxt-plotly": "1.0.12",
+    "redis": "^4.7.0",
     "vue": "latest",
     "vue-router": "latest",
     "vue-showdown": "^4.2.0",

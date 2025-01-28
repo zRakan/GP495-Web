@@ -18,10 +18,10 @@ export default defineEventHandler(async function(event) {
     const { username, password } = body.data;
 
     try {
-        const user = await User.findOne({ username });
-        if(!user) return { status: false, message: "Invalid Username/Password" }
+        const user = await User.findUser({ username });
+        if(user === false) return { status: false, message: "Invalid Username/Password" }
 
-        const isPasswordMatch = await user.passwordMatch(password);
+        const isPasswordMatch = await verifyPassword(user.password, password);
         if(!isPasswordMatch) return { status: false, message: "Invalid Username/Password" }
 
         // Valid Username & Password
