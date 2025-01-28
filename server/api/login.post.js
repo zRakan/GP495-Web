@@ -1,11 +1,11 @@
 import { User } from "../models/User.model"; 
+import { z } from "zod";
 
 function badInputs(event) {
     setResponseStatus(event, 400);
     return { status: false }
 }
 
-import { z } from "zod";
 const bodyValidation = z.object({
     username: z.string().nonempty(),
     password: z.string().min(8)
@@ -38,7 +38,7 @@ export default defineEventHandler(async function(event) {
         });
 
         return { status: true }
-    } catch(err) {
+    } catch {
         return badInputs(event);
     }
 });

@@ -1,5 +1,4 @@
 export default defineEventHandler(async function(event) {
-    
     try {
         await requireUserSession(event);
 

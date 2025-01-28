@@ -1,4 +1,5 @@
 import { Chat } from "../models/Chats.model.js"; 
+import { z } from "zod";
 
 function badInputs(event) {
     setResponseStatus(event, 400);
@@ -9,12 +10,11 @@ function validJSON(data) {
     try {
         JSON.parse(data);
         return true;
-    } catch(err) {
+    } catch {
         return false;
     }
 }
 
-import { z } from "zod";
 const bodyValidation = z.object({
     id: z.string().uuid().nullable(),
     message: z.string().nonempty()

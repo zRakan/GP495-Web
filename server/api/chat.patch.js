@@ -1,11 +1,11 @@
 import { Chat } from "../models/Chats.model.js";
+import { z } from "zod";
 
 function badInputs(event) {
     setResponseStatus(event, 400);
     return { status: false }
 }
 
-import { z } from "zod";
 const bodyValidation = z.object({
     id: z.string().uuid(),
     title: z.string().nonempty()
@@ -20,7 +20,7 @@ export default defineEventHandler(async function(event) {
 
         const { id, title } = body.data;
 
-        const chat = await Chat.updateOne({ id, author: secure.authorId }, { title });
+        await Chat.updateOne({ id, author: secure.authorId }, { title });
         
         return { status: true }
     } catch(err) {

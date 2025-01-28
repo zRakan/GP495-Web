@@ -1,11 +1,11 @@
 import { Chat } from "../models/Chats.model.js"; 
+import { z } from "zod";
 
 function badInputs(event) {
     setResponseStatus(event, 400);
     return { status: false }
 }
 
-import { z } from "zod";
 const queryValidation = z.object({
     id: z.string().uuid()
 })
