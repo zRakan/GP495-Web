@@ -7,7 +7,7 @@ function badInputs(event) {
 }
 
 const queryValidation = z.object({
-    id: z.string().uuid()
+    id: z.union([z.string().uuid(), z.literal("-1")])
 })
 
 export default defineEventHandler(async function(event) {
