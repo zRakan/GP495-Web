@@ -12,7 +12,7 @@ function rateLimit(event) {
 }
 
 const bodyValidation = z.object({
-    username: z.string().nonempty(),
+    username: z.string().min(3),
     password: z.string().min(8)
 });
 

@@ -15,9 +15,10 @@
         const data = event.data;
 
         if(!data.username) return notification.add({ title: 'Username is required' });
-        
+        if(data.username.length < 3) return notification.add({ title: 'Username length should be 3 or more' });
+
         if(!data.password) return notification.add({ title: "Password is required" });
-        if(data.password.length < 8) return notification.add({ title: "Password should be 8 and more" });
+        if(data.password.length < 8) return notification.add({ title: "Password length should be 8 or more" });
 
         pending.value = true;
         const resp = await $fetch('/api/login', {
