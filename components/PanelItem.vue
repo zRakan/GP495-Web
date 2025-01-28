@@ -76,7 +76,7 @@
                 if(data.status == false) {
                     notification.add({ title: 'Something went wrong' });
                 } else {
-                    for(let chat of chatList.value) {
+                    for(const chat of chatList.value) {
                         if(chat.id == id) {
                             chat.title = currentTitle.value;
                             break;
@@ -354,14 +354,14 @@
 <template>
     <div class="w-[250px] flex-shrink-0 rounded-2xl flex flex-col gap-4 mx-5 m-2 pt-3 px-4 bg-[#ffffff] dark:bg-[#1e1e1e] shadow-2xl dark:shadow-none">
         <div class="flex items-center">
-            <img @click="selectedChat = null" class="hidden dark:block cursor-pointer" width="150" src="/Logo_dark.png" />
-            <img @click="selectedChat = null" class="block dark:hidden cursor-pointer" width="150" src="/Logo.png" />
+            <img class="hidden dark:block cursor-pointer" width="150" src="/Logo_dark.png" @click="selectedChat = null">
+            <img class="block dark:hidden cursor-pointer" width="150" src="/Logo.png" @click="selectedChat = null">
 
             <ClientOnly>
-                <UButton class="ml-auto" :color="isDark ? 'gray' : 'white'" @click="isDark = !isDark" variant="ghost" :icon="isDark ? 'material-symbols:light-mode' : 'material-symbols:dark-mode'" />
+                <UButton class="ml-auto" :color="isDark ? 'gray' : 'white'" variant="ghost" :icon="isDark ? 'material-symbols:light-mode' : 'material-symbols:dark-mode'" @click="isDark = !isDark" />
             </ClientOnly>
         </div>
-        <UButton @click="selectChat(null)" size="xl" :ui="{ rounded: 'rounded-full' }" icon="ri-add-line" label="New Chat" block />
+        <UButton block size="xl" :ui="{ rounded: 'rounded-full' }" icon="ri-add-line" label="New Chat" @click="selectChat(null)" />
 
         <PanelSection>
             <p class="text-[12px]">Your conversations</p>
@@ -372,18 +372,18 @@
         </PanelSection>
 
         <div id="chat-list" class="overflow-y-auto pb-5">
-            <template v-for="chat in chatList">
+            <template v-for="(chat, index) in chatList" :key="index">
                 <div class="flex items-center relative">
-                    <div @click="selectedChat != chat.id && selectChat(chat.id)" class="cursor-pointer px-1 py-2 rounded-md flex w-full gap-1 items-center transition-colors hover:bg-primary-100 dark:hover:bg-primary-400 truncate">
+                    <div class="cursor-pointer px-1 py-2 rounded-md flex w-full gap-1 items-center transition-colors hover:bg-primary-100 dark:hover:bg-primary-400 truncate" @click="selectedChat != chat.id && selectChat(chat.id)">
                         <UIcon class="min-w-[16px] min-h-[16px]" name="mdi-chat-processing-outline" />
                         
                         <p v-if="editing != chat.id" class="w-[85%] truncate">{{ chat.title }}</p>
-                        <input v-else class="w-[85%]" v-model="currentTitle" />
+                        <input v-else v-model="currentTitle" class="w-[85%]">
                     </div>
 
-                    <div class="flex ml-auto bg-primary-500 p-1 rounded-2xl absolute right-1" v-if="chat.id == selectedChat">
-                        <UIcon @click="deleteChat(chat.id)" class="cursor-pointer hover:bg-red-500" name="solar-trash-bin-trash-outline" />
-                        <UIcon @click="toggleEdit(chat.id, chat.title)" class="cursor-pointer" :class="(editing && currentTitle != chat.title) ? 'hover:bg-green-600' : 'hover:bg-yellow-500'" :name="editing && currentTitle != chat.title ? 'material-symbols:check-box-outline' : 'material-symbols:edit-square-outline'" />
+                    <div v-if="chat.id == selectedChat" class="flex ml-auto bg-primary-500 p-1 rounded-2xl absolute right-1">
+                        <UIcon class="cursor-pointer hover:bg-red-500" name="solar-trash-bin-trash-outline" @click="deleteChat(chat.id)" />
+                        <UIcon class="cursor-pointer" :class="(editing && currentTitle != chat.title) ? 'hover:bg-green-600' : 'hover:bg-yellow-500'" :name="editing && currentTitle != chat.title ? 'material-symbols:check-box-outline' : 'material-symbols:edit-square-outline'" @click="toggleEdit(chat.id, chat.title)" />
                     </div>
                 </div>
             </template>
@@ -423,24 +423,24 @@
                 <template #panel>
                     <div class="p-2">
                         <div class="flex flex-row items-center justify-center">
-                            <UButton @click="logout()" variant="link" color="red" label="Logout" />
+                            <UButton variant="link" color="red" label="Logout" @click="logout()" />
                         </div>
                     </div>
                 </template>
             </UPopover>
 
             <!-- Account Settings Modal -->
-            <UModal :ui="{ strategy: 'override', width: 'w-[40%]' }" v-model="accountSettings">
+            <UModal v-model="accountSettings" :ui="{ strategy: 'override', width: 'w-[40%]' }">
                 <div class="p-4">
                     <div class="relative h-auto">
                         <p class="text-[32px] text-center pb-5">Manage Accounts</p>
 
                         <div class="flex items-center justify-center gap-5 pb-5">
-                            <UInput placeholder="Username" v-model="usernameInput" />
-                            <UInput placeholder="Password" v-model="passwordInput" />
+                            <UInput v-model="usernameInput" placeholder="Username" />
+                            <UInput v-model="passwordInput" placeholder="Password" />
                             <USelect v-model="selectedRole" :options="roles" />
 
-                            <UIcon @click="addUser()" class="cursor-pointer hover:bg-green-500 w-5 h-5" name="ri-add-circle-line" />
+                            <UIcon class="cursor-pointer hover:bg-green-500 w-5 h-5" name="ri-add-circle-line" @click="addUser()" />
                         </div>
 
                         <div class="h-80 overflow-auto">
@@ -459,12 +459,12 @@
                                         <td><USkeleton class="w-full h-8 m-2" /></td>
                                     </tr>
 
-                                    <template v-for="user in users">
+                                    <template v-for="(tblUser, index) in users" :key="index">
                                         <tr>
-                                            <td class="!text-center">{{ user.username }}</td>
+                                            <td class="!text-center">{{ tblUser.username }}</td>
 
                                             <td class="!text-center">
-                                                <UIcon @click="deleteUser(user.id, user)" class="cursor-pointer hover:bg-red-500 w-5 h-5" name="solar-trash-bin-trash-outline" />
+                                                <UIcon class="cursor-pointer hover:bg-red-500 w-5 h-5" name="solar-trash-bin-trash-outline" @click="deleteUser(tblUser.id, tblUser)" />
                                             </td>
                                         </tr>
                                     </template>
@@ -476,7 +476,7 @@
             </UModal>
 
             <!-- Training Settings modal -->
-            <UModal :ui="{ strategy: 'override', width: 'w-[80%]' }" v-model="trainingSettings">
+            <UModal v-model="trainingSettings" :ui="{ strategy: 'override', width: 'w-[80%]' }">
                 <div class="p-4">
                     <div class="relative h-auto">
                         <p class="text-[32px] text-center pb-5">Manage Training Data {{ trainingData && `(${trainingData.length})` }}</p>
@@ -498,18 +498,18 @@
                                     </tr>
 
                                     <tr v-else>
-                                        <td><input class="w-full" placeholder="Question" v-model="Question"></td>
-                                        <td><input class="w-full" placeholder="SQL Answer" v-model="Answer"></td>
+                                        <td><input v-model="Question" class="w-full" placeholder="Question"></td>
+                                        <td><input v-model="Answer" class="w-full" placeholder="SQL Answer"></td>
                                         <td class="!text-center">
-                                            <UIcon @click="addQdrant()" class="cursor-pointer hover:bg-green-500 w-5 h-5" name="ri-add-circle-line" />
+                                            <UIcon class="cursor-pointer hover:bg-green-500 w-5 h-5" name="ri-add-circle-line" @click="addQdrant()" />
                                         </td>
                                     </tr>
 
-                                    <template v-for="data in trainingData">
+                                    <template v-for="(data, index) in trainingData" :key="index">
                                         <tr class="text-sm">
                                             <template v-if="data == selectedData">
-                                                <td><input class="w-full" v-model="editedData.query" /></td>
-                                                <td><input class="w-full" v-model="editedData.answer" /></td>
+                                                <td><input v-model="editedData.query" class="w-full"></td>
+                                                <td><input v-model="editedData.answer" class="w-full"></td>
                                             </template>
 
                                             <template v-else>
@@ -518,8 +518,8 @@
                                             </template>
 
                                             <td class="!text-center">
-                                                <UIcon @click="deleteQdrant(data)" class="cursor-pointer hover:bg-red-500 w-5 h-5" name="solar-trash-bin-trash-outline" />
-                                                <UIcon @click="isChanged ? editedQdrant() : editingQdrant(data)" class="cursor-pointer w-5 h-5" :class="isChanged ? 'hover:bg-green-600' : 'hover:bg-yellow-500'" :name="isChanged ? 'material-symbols:check-box-outline' : 'material-symbols:edit-square-outline'" />
+                                                <UIcon class="cursor-pointer hover:bg-red-500 w-5 h-5" name="solar-trash-bin-trash-outline" @click="deleteQdrant(data)" />
+                                                <UIcon class="cursor-pointer w-5 h-5" :class="isChanged ? 'hover:bg-green-600' : 'hover:bg-yellow-500'" :name="isChanged ? 'material-symbols:check-box-outline' : 'material-symbols:edit-square-outline'" @click="isChanged ? editedQdrant() : editingQdrant(data)" />
                                             </td>
                                         </tr>
                                     </template>

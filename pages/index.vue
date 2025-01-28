@@ -6,8 +6,8 @@
 
 <template>
     <div class="h-screen flex">
-        <Panel class="z-0" />
-        <Chat />
+        <PanelItem class="z-0" />
+        <ChatItem />
     </div>
 </template>
 

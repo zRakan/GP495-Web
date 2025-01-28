@@ -4,15 +4,15 @@
 
 <template>
     <UPopover>
-        <slot></slot>
+        <slot />
 
         <template #panel="{ close }">
             <div class="p-4">
                 <p>Are you sure?</p>
 
                 <div class="flex flex-row gap-2">
-                    <UButton @click="emit('clicked', -1, close)" label="Yes" />
-                    <UButton @click="emit('clicked', false, close)" label="No" />
+                    <UButton label="Yes" @click="emit('clicked', -1, close)" />
+                    <UButton label="No" @click="emit('clicked', false, close)" />
                 </div>
             </div>
         </template>

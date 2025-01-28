@@ -49,11 +49,11 @@
     <div class="h-screen flex justify-center items-center">
         <div class="flex flex-col gap-5 justify-center w-[400px] p-8 rounded-3xl bg-[#ffffff] dark:bg-[#1e1e1e] shadow-2xl dark:shadow-none">
             <ClientOnly>
-                <UButton class="ml-auto" :color="isDark ? 'gray' : 'white'" @click="isDark = !isDark" variant="ghost" :icon="isDark ? 'material-symbols:light-mode' : 'material-symbols:dark-mode'" />
+                <UButton class="ml-auto" :color="isDark ? 'gray' : 'white'" variant="ghost" :icon="isDark ? 'material-symbols:light-mode' : 'material-symbols:dark-mode'" @click="isDark = !isDark" />
             </ClientOnly>
 
-            <img class="self-center hidden dark:block" width="250" src="/Logo_dark.png" />
-            <img class="self-center block dark:hidden" width="250" src="/Logo.png" />
+            <img class="self-center hidden dark:block" width="250" src="/Logo_dark.png">
+            <img class="self-center block dark:hidden" width="250" src="/Logo.png">
 
             <UForm class="flex flex-col gap-5 mb-5" :state="state" @submit.prevent="onLogin">
                 <UFormGroup label="Username" name="username">
