@@ -63,20 +63,16 @@ export default defineEventHandler(async function(event) {
         const messagesIndex = (resp.conversation.findLastIndex((message) => message.role == 'user'));
         const messages = resp.conversation.slice(messagesIndex);
         
-        // Validate plotly json
+
+        // Remove invalid plotly json
         for(let message = messagesIndex; message < resp.conversation.length; message++) {
             if(resp.conversation[message].type == "Plotly" && !validJSON(resp.conversation[message].content)) {
-                
-                // fallback JSON
-                resp.conversation[message].content = JSON.stringify({
-                    data: {},
-                    layout: {}
-                });
+                delete resp.conversation[message];
             }
         }
-        
-        chat.history = resp.conversation;
 
+        // Filter out null(s)
+        chat.history = resp.conversation.filter(el => el !== null);
 
         // Save chat state
         await chat.save();
