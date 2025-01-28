@@ -10,7 +10,9 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@nuxt/eslint": "^0.7.5",
     "@nuxt/ui": "^2.20.0",
+    "eslint": "^9.19.0",
     "mongoose": "^8.9.0",
     "nuxt": "^3.14.1592",
     "nuxt-auth-utils": "^0.5.7",
