@@ -109,12 +109,12 @@
                     </div>
 
                     <!-- AI Resposne -->
-                    <div v-if="currentMessage.role == 'assistant'" class="pt-2 pl-[32px] overflow-x-auto">
+                    <div v-if="currentMessage.role == 'assistant'" class="mt-2 ml-[32px] overflow-x-auto" :style="currentMessage.type == 'Markdown' && { 'height': '400px', 'width': '600px', 'scrollbar-width': 'thin' }">
                         <p v-if="index > 0 && messages[index-1].role != currentMessage.role" class="pb-2 text-primary-500">Mostaelim <UIcon name="line-md:search" /></p>
 
                         <p v-if="!currentMessage.type">{{ currentMessage.content }}</p>
 
-                        <VueShowdown v-else-if="currentMessage.type == 'Markdown'" class="w-fit transition-colors" flavor="original" :markdown="currentMessage.content" :options="{ tables: true, literalMidWordUnderscores: true }" />
+                        <VueShowdown v-else-if="currentMessage.type == 'Markdown'" flavor="original" :markdown="currentMessage.content" :options="{ tables: true, literalMidWordUnderscores: true }" />
 
                         <nuxt-plotly v-else-if="currentMessage.type == 'Plotly'" style="width: 400px;" :data="JSON.parse(currentMessage.content).data" :layout="JSON.parse(currentMessage.content).layout" :config="{ scrollZoom: true, displayModeBar: false }" />
                     </div>
