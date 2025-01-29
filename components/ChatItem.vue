@@ -109,7 +109,7 @@
                     </div>
 
                     <!-- AI Resposne -->
-                    <div v-if="currentMessage.role == 'assistant'" class="mt-2 ml-[32px] overflow-x-auto" :style="currentMessage.type == 'Markdown' && { 'height': '400px', 'width': '600px', 'scrollbar-width': 'thin' }">
+                    <div v-if="currentMessage.role == 'assistant'" class="mt-2 ml-[32px] overflow-x-auto" :style="currentMessage.type == 'Markdown' && { 'max-height': '400px', 'width': '600px', 'scrollbar-width': 'thin' }">
                         <p v-if="index > 0 && messages[index-1].role != currentMessage.role" class="pb-2 text-primary-500">Mostaelim <UIcon name="line-md:search" /></p>
 
                         <p v-if="!currentMessage.type">{{ currentMessage.content }}</p>
