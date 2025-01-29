@@ -117,6 +117,8 @@
                         <VueShowdown v-else-if="currentMessage.type == 'Markdown'" flavor="original" :markdown="currentMessage.content" :options="{ tables: true, literalMidWordUnderscores: true }" />
 
                         <nuxt-plotly v-else-if="currentMessage.type == 'Plotly'" style="width: 400px;" :data="JSON.parse(currentMessage.content).data" :layout="JSON.parse(currentMessage.content).layout" :config="{ scrollZoom: true, displayModeBar: false }" />
+                        
+                        <VueShowdown v-else-if="currentMessage.type == 'Analyze'" :markdown="currentMessage.content"  />
                     </div>
                 </template>
             </ClientOnly>
