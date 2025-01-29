@@ -12,7 +12,8 @@ function badInputs(event) {
 
 export default defineEventHandler(async function(event) {
     try {
-        await requireUserSession(event);
+        const { secure } = await requireUserSession(event);
+        if(secure.role != 'admin') return badInputs(event);
 
         const body = await readValidatedBody(event, bodyValidation.safeParse);
         if(!body.success) return badInputs(event);

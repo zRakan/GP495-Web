@@ -1,6 +1,12 @@
+function badInputs(event) {
+    setResponseStatus(event, 400);
+    return { status: false }
+}
+
 export default defineEventHandler(async function(event) {
     try {
-        await requireUserSession(event);
+        const { secure } = await requireUserSession(event);
+        if(secure.role != 'admin') return badInputs(event);
 
         const resp = await $fetch('http://localhost:8000/dataList');
 

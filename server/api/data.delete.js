@@ -10,7 +10,8 @@ function badInputs(event) {
 
 export default defineEventHandler(async function(event) {
     try {
-        await requireUserSession(event);
+        const { secure } = await requireUserSession(event);
+        if(secure.role != 'admin') return badInputs(event);
 
         const query = await getValidatedQuery(event, queryValidation.safeParse);
         if(!query.success) return badInputs(event);
