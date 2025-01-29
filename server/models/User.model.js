@@ -1,5 +1,6 @@
 import { model, Schema } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
+import * as crypto from "node:crypto";
 
 const schema = new Schema({
     id: {
@@ -70,3 +71,26 @@ schema.pre('save', async function() {
 });
 
 export const User = model('User', schema);
+
+// Generate an admin account for first initialize
+(async() => {
+    if(!(await User.findOne({}))) {
+        console.log("Initialize user accounts");
+
+        const PASSWORD = crypto.randomBytes(20).toString('hex');
+        const adminUser = new User({
+            username: 'admin',
+            
+            password: PASSWORD,
+
+            role: 'admin'
+        });
+
+        await adminUser.save();
+        
+        console.log(`Initialized Admin account:
+Username: admin
+Password: ${PASSWORD}
+* COPY THE CREDENTIALS, IT WILL NOT DISPLAY AGAIN.`)
+    }
+})();
