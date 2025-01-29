@@ -201,7 +201,9 @@
         // Fetch data
         const resp = await $fetch('/api/data', { ignoreResponseError: true });
         if(resp.status == false) {
+            trainingSettings.value = false;
             notification.add({ title: 'Something went wrong' });
+            
             return;
         }
 
